@@ -1,23 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    @apply font-body bg-cream text-navy-900 leading-relaxed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .container {
+    @apply max-w-[1200px] mx-auto px-6;
+  }
+
+  .btn-primary {
+    @apply bg-orange-500 text-white px-7 py-4 rounded-button font-semibold text-base
+           inline-flex items-center gap-2 shadow-button transition-all duration-200
+           hover:bg-orange-600 hover:-translate-y-0.5 hover:shadow-button-hover;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-navy-900 px-7 py-4 rounded-button font-semibold text-base
+           border-2 border-navy-100 transition-all duration-200
+           hover:border-navy-800;
+  }
+
+  .btn-white {
+    @apply bg-white text-orange-600 px-7 py-4 rounded-button font-semibold text-base
+           transition-all duration-200 hover:-translate-y-0.5 hover:shadow-floating;
+  }
+
+  .btn-outline-white {
+    @apply bg-transparent text-white px-7 py-4 rounded-button font-semibold text-base
+           border-2 border-white/40 transition-all duration-200
+           hover:border-white hover:bg-white/10;
+  }
+
+  .section-eyebrow {
+    @apply text-eyebrow text-orange-500 uppercase tracking-widest mb-3;
+  }
+
+  .section-title {
+    @apply font-heading text-section text-navy-900 mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-gray-600 text-lg max-w-[600px] mx-auto;
+  }
 }
 
 @layer utilities {

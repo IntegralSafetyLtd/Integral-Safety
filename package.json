@@ -9,18 +9,28 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.33"
+    "@payloadcms/db-postgres": "^3.66.0",
+    "@payloadcms/next": "^3.66.0",
+    "@payloadcms/richtext-lexical": "^3.66.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "graphql": "^16.12.0",
+    "lucide-react": "^0.555.0",
+    "next": "^15.5.7",
+    "payload": "^3.66.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "resend": "^6.5.2",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
+    "@types/node": "^20.19.25",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "dotenv": "^17.2.3",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.33",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.33"
+    "typescript": "^5"
   }
 }
