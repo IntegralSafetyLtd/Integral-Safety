@@ -46,6 +46,8 @@ RewriteRule ^training/([a-z0-9-]+)/?$ training-single.php?slug=$1 [L,QSA]
 # Clean URLs - Static Pages
 RewriteRule ^about/?$ about.php [L,QSA]
 RewriteRule ^contact/?$ contact.php [L,QSA]
+RewriteRule ^privacy/?$ privacy.php [L,QSA]
+RewriteRule ^terms/?$ terms.php [L,QSA]
 
 # Admin area (no rewriting needed, direct access)
 # /admin/ works as-is

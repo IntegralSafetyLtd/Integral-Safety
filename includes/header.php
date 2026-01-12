@@ -133,7 +133,7 @@ $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
     </div>
 
     <!-- Main Header -->
-    <header class="bg-white py-4 border-b border-navy-100 sticky top-0 z-50 shadow-sm">
+    <header class="bg-white py-4 border-b border-navy-100 lg:sticky lg:top-0 z-50 shadow-sm">
         <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
             <!-- Logo -->
             <a href="/" class="flex items-center">
