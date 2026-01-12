@@ -163,7 +163,7 @@ $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
                 <a href="/training" class="text-navy-800 font-medium hover:text-orange-500 transition-colors">Training</a>
                 <a href="/about" class="text-navy-800 font-medium hover:text-orange-500 transition-colors">About</a>
                 <a href="/contact" class="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors shadow-md hover:shadow-lg">
-                    Get a Quote
+                    Contact Us
                 </a>
             </nav>
 
@@ -183,7 +183,7 @@ $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
                 <a href="/training" class="block text-navy-800 font-medium hover:text-orange-500">Training</a>
                 <a href="/about" class="block text-navy-800 font-medium hover:text-orange-500">About</a>
                 <a href="/contact" class="block bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold text-center hover:bg-orange-600">
-                    Get a Quote
+                    Contact Us
                 </a>
             </div>
         </div>
