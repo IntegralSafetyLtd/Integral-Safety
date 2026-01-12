@@ -26,10 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'meta_keywords' => sanitize($_POST['meta_keywords']),
             'hero_title' => sanitize($_POST['hero_title']),
             'hero_subtitle' => sanitize($_POST['hero_subtitle']),
+            'hero_image' => sanitize($_POST['hero_image']),
             'content' => $_POST['content'], // Allow HTML from editor
         ];
 
-        $sql = "UPDATE pages SET title = ?, meta_description = ?, meta_keywords = ?, hero_title = ?, hero_subtitle = ?, content = ? WHERE slug = ?";
+        $sql = "UPDATE pages SET title = ?, meta_description = ?, meta_keywords = ?, hero_title = ?, hero_subtitle = ?, hero_image = ?, content = ? WHERE slug = ?";
         $params = array_values($data);
         $params[] = $slug;
 
@@ -104,6 +105,7 @@ require_once __DIR__ . '/includes/header.php';
                 <label class="block text-gray-700 font-medium mb-2">Hero Title</label>
                 <input type="text" name="hero_title" value="<?= e($editPage['hero_title']) ?>"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                <p class="text-sm text-gray-500 mt-1">For home page: Text before "Health & Safety Experts"</p>
             </div>
 
             <div>
@@ -111,6 +113,20 @@ require_once __DIR__ . '/includes/header.php';
                 <input type="text" name="hero_subtitle" value="<?= e($editPage['hero_subtitle']) ?>"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
             </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 font-medium mb-2">Hero Image</label>
+            <div class="flex gap-2">
+                <input type="text" name="hero_image" id="hero_image" value="<?= e($editPage['hero_image']) ?>"
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                       placeholder="/uploads/image.jpg">
+                <button type="button" onclick="openGalleryPicker('hero_image')"
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300">
+                    Browse
+                </button>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">Image displayed on the right side of the hero section</p>
         </div>
 
         <div class="mb-6">
@@ -170,5 +186,87 @@ require_once __DIR__ . '/includes/header.php';
     </table>
 </div>
 <?php endif; ?>
+
+<!-- Gallery Picker Modal -->
+<div id="galleryModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold text-gray-800">Select Image</h3>
+            <button onclick="closeGalleryPicker()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto" style="max-height: calc(80vh - 140px);">
+            <div id="galleryGrid" class="grid grid-cols-4 md:grid-cols-6 gap-4">
+                <!-- Images loaded via JavaScript -->
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+            <button onclick="closeGalleryPicker()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onclick="selectGalleryImage()" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Select</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let galleryTargetField = null;
+let selectedImage = null;
+
+function openGalleryPicker(fieldId) {
+    galleryTargetField = fieldId;
+    selectedImage = null;
+    document.getElementById('galleryModal').classList.remove('hidden');
+    loadGalleryImages();
+}
+
+function closeGalleryPicker() {
+    document.getElementById('galleryModal').classList.add('hidden');
+    galleryTargetField = null;
+    selectedImage = null;
+}
+
+function loadGalleryImages() {
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    fetch('/admin/api/gallery-images.php?csrf_token=' + encodeURIComponent(csrfToken))
+        .then(res => res.json())
+        .then(data => {
+            const grid = document.getElementById('galleryGrid');
+            if (data.success && data.images.length > 0) {
+                grid.innerHTML = data.images.map(img => `
+                    <div class="cursor-pointer border-2 border-transparent rounded-lg overflow-hidden hover:border-orange-300 transition-colors gallery-item"
+                         data-url="/uploads/${img.filename}"
+                         onclick="highlightGalleryImage(this, '/uploads/${img.filename}')">
+                        <img src="/uploads/${img.filename}" alt="${img.alt_text || ''}" class="w-full h-24 object-cover">
+                    </div>
+                `).join('');
+            } else {
+                grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">No images in gallery. Upload images via the Gallery page.</p>';
+            }
+        })
+        .catch(err => {
+            console.error('Error loading gallery:', err);
+            document.getElementById('galleryGrid').innerHTML = '<p class="col-span-full text-center text-red-500 py-8">Error loading images</p>';
+        });
+}
+
+function highlightGalleryImage(el, url) {
+    document.querySelectorAll('.gallery-item').forEach(item => {
+        item.classList.remove('border-orange-500');
+        item.classList.add('border-transparent');
+    });
+    el.classList.remove('border-transparent');
+    el.classList.add('border-orange-500');
+    selectedImage = url;
+}
+
+function selectGalleryImage() {
+    if (selectedImage && galleryTargetField) {
+        document.getElementById(galleryTargetField).value = selectedImage;
+    }
+    closeGalleryPicker();
+}
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

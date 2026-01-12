@@ -58,6 +58,11 @@ $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
                         cream: {
                             DEFAULT: '#faf9f7',
                             dark: '#f5f3ef'
+                        },
+                        green: {
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a'
                         }
                     },
                     fontFamily: {
@@ -86,6 +91,17 @@ $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
         .prose strong { font-weight: 600; color: #0c1929; }
         .prose a { color: #e85d04; text-decoration: underline; }
         .prose a:hover { color: #dc5503; }
+
+        /* Blob animations */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
     </style>
 
     <!-- Structured Data -->

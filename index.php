@@ -18,26 +18,26 @@ require_once INCLUDES_PATH . '/header.php';
 
 <!-- Hero Section -->
 <section class="py-20 md:py-24 bg-white relative overflow-hidden">
+    <!-- Background decorative blobs -->
     <div class="absolute top-0 right-0 w-1/2 h-full opacity-70 pointer-events-none">
-        <div class="absolute top-[30%] right-[30%] w-[400px] h-[400px] bg-orange-100 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] bg-green-100 rounded-full blur-3xl"></div>
+        <div class="absolute top-[30%] right-[30%] w-[400px] h-[400px] bg-orange-100 rounded-full blur-3xl animate-blob"></div>
+        <div class="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] bg-green-100 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
     </div>
 
     <div class="max-w-6xl mx-auto px-6">
         <div class="grid lg:grid-cols-2 gap-16 items-center relative z-10">
             <div>
                 <!-- Badge -->
-                <div class="inline-flex items-center gap-2 bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                <div class="inline-flex items-center gap-2 bg-green-100 text-green-500 px-4 py-2 rounded-full text-sm font-semibold mb-6">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     IOSH Approved Training Provider
                 </div>
 
                 <h1 class="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold text-navy-900 mb-6 leading-tight">
-                    <?= e($page['hero_title'] ?: "Leicestershire's Trusted") ?>
-                    <span class="text-orange-500">Health & Safety</span> Experts
+                    <?= e($page['hero_title'] ?: "Leicestershire's Trusted") ?> <span class="text-orange-500">Health & Safety</span> Experts
                 </h1>
 
-                <p class="text-lg text-gray-600 mb-8 max-w-lg leading-relaxed">
+                <p class="text-lg text-gray-600 mb-8 max-w-[500px] leading-relaxed">
                     <?= e($page['hero_subtitle'] ?: 'From fire risk assessments to IOSH training, we help Midlands businesses create safer workplaces. Over 20 years of experience protecting your people, property, and peace of mind.') ?>
                 </p>
 
@@ -53,10 +53,10 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Trust Indicators -->
                 <div class="flex items-center gap-4">
                     <div class="flex -space-x-3">
-                        <div class="w-10 h-10 rounded-full bg-navy-700 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">CJ</div>
-                        <div class="w-10 h-10 rounded-full bg-navy-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">SK</div>
-                        <div class="w-10 h-10 rounded-full bg-navy-700 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">MS</div>
-                        <div class="w-10 h-10 rounded-full bg-navy-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">PC</div>
+                        <div class="w-10 h-10 rounded-full bg-navy-700 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">JL</div>
+                        <div class="w-10 h-10 rounded-full bg-navy-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">MS</div>
+                        <div class="w-10 h-10 rounded-full bg-navy-700 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">CW</div>
+                        <div class="w-10 h-10 rounded-full bg-navy-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">TH</div>
                     </div>
                     <div class="text-sm text-gray-600">
                         <strong class="text-navy-900">Trusted by 100+ organisations</strong><br>
@@ -68,7 +68,8 @@ require_once INCLUDES_PATH . '/header.php';
             <!-- Hero Image -->
             <div class="relative hidden lg:block">
                 <div class="relative w-full h-[480px] rounded-2xl shadow-2xl overflow-hidden">
-                    <img src="/uploads/safety-consultant.jpg" alt="Health and safety consultant conducting a workplace inspection" class="w-full h-full object-cover">
+                    <?php $heroImage = $page['hero_image'] ?: '/uploads/safety-consultant.jpg'; ?>
+                    <img src="<?= e($heroImage) ?>" alt="Health and safety consultant conducting a workplace inspection" class="w-full h-full object-cover">
                 </div>
             </div>
         </div>
