@@ -1,10 +1,11 @@
 <?php
 /**
- * Homepage
+ * Homepage - Section-based with fallback
  */
 require_once __DIR__ . '/config.php';
 require_once INCLUDES_PATH . '/database.php';
 require_once INCLUDES_PATH . '/functions.php';
+require_once INCLUDES_PATH . '/sections.php';
 
 $page = getPage('home');
 $pageTitle = $page['title'] . ' | ' . getSetting('site_name', SITE_NAME);
@@ -13,8 +14,96 @@ $metaDescription = $page['meta_description'];
 $services = getServices(true);
 $testimonials = getTestimonials();
 
+// Get sections for home page
+$sections = getSections('page', $page['id']);
+$useSections = !empty($sections);
+
 require_once INCLUDES_PATH . '/header.php';
+
+if ($useSections):
+    // Render all sections from the database
+    foreach ($sections as $section):
+        renderSection($section);
+    endforeach;
+
+    // Render dynamic services section (always show, but only if not already in sections)
+    $hasServicesSection = false;
+    foreach ($sections as $section) {
+        if ($section['section_type'] === 'cards') {
+            $hasServicesSection = true;
+            break;
+        }
+    }
+
+    if (!$hasServicesSection && !empty($services)):
 ?>
+<!-- Services Section -->
+<section class="py-24 bg-cream" id="services">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-14">
+            <p class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Our Services</p>
+            <h2 class="font-heading text-3xl md:text-4xl font-semibold text-navy-900 mb-4">Comprehensive Health & Safety Solutions</h2>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                Practical, proportionate advice that protects your people and keeps your business compliant.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <?php foreach ($services as $service): ?>
+            <a href="/services/<?= e($service['slug']) ?>" class="group bg-white rounded-2xl p-8 border border-transparent transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-orange-100">
+                <div class="w-14 h-14 bg-cream rounded-xl flex items-center justify-center mb-5 transition-colors group-hover:bg-orange-100">
+                    <?= getIcon($service['icon'] ?? 'clipboard', 'w-7 h-7 text-navy-700 group-hover:text-orange-600 transition-colors') ?>
+                </div>
+                <h3 class="font-heading font-bold text-xl text-navy-900 mb-3"><?= e($service['title']) ?></h3>
+                <p class="text-gray-600 leading-relaxed"><?= e($service['short_description']) ?></p>
+            </a>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="text-center mt-12">
+            <a href="/services" class="text-orange-500 font-semibold hover:text-orange-600 transition-colors">
+                View All Services &rarr;
+            </a>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<?php
+    // Render testimonials if they exist
+    if (!empty($testimonials)):
+?>
+<section class="py-24 bg-cream">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-14">
+            <p class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Testimonials</p>
+            <h2 class="font-heading text-3xl md:text-4xl font-semibold text-navy-900">What Our Clients Say</h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <?php foreach (array_slice($testimonials, 0, 3) as $testimonial): ?>
+            <div class="bg-white rounded-2xl p-8 shadow-lg">
+                <div class="flex gap-1 mb-4">
+                    <?php for ($i = 0; $i < $testimonial['rating']; $i++): ?>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <?php endfor; ?>
+                </div>
+                <p class="text-gray-600 mb-6 italic">"<?= e($testimonial['content']) ?>"</p>
+                <div>
+                    <p class="font-semibold text-navy-900"><?= e($testimonial['client_name']) ?></p>
+                    <?php if ($testimonial['company']): ?>
+                    <p class="text-gray-500 text-sm"><?= e($testimonial['company']) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<?php else: ?>
+<!-- Fallback: Original hardcoded sections when no sections exist in database -->
 
 <!-- Hero Section -->
 <section class="py-20 md:py-24 bg-white relative overflow-hidden">
@@ -208,5 +297,7 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </section>
+
+<?php endif; ?>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

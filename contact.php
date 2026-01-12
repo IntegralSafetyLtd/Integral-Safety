@@ -1,12 +1,14 @@
 <?php
 /**
- * Contact Page
+ * Contact Page - Section-based header with contact form
  */
 require_once __DIR__ . '/config.php';
 require_once INCLUDES_PATH . '/database.php';
 require_once INCLUDES_PATH . '/functions.php';
 require_once INCLUDES_PATH . '/auth.php';
+require_once INCLUDES_PATH . '/sections.php';
 
+$page = getPage('contact');
 $pageTitle = 'Contact Us | ' . getSetting('site_name', SITE_NAME);
 $metaDescription = 'Get in touch with Integral Safety Ltd for a free quote on health and safety services.';
 
@@ -45,18 +47,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-require_once INCLUDES_PATH . '/header.php';
-?>
+// Get sections for contact page (header sections only)
+$sections = getSections('page', $page['id']);
+$headerSections = [];
+foreach ($sections as $section) {
+    if (in_array($section['section_type'], ['page_header', 'hero'])) {
+        $headerSections[] = $section;
+    }
+}
 
-<!-- Hero -->
+require_once INCLUDES_PATH . '/header.php';
+
+// Render header sections if they exist
+if (!empty($headerSections)):
+    foreach ($headerSections as $section):
+        renderSection($section);
+    endforeach;
+else:
+?>
+<!-- Default Hero -->
 <section class="py-16 bg-navy-800 text-white">
     <div class="max-w-6xl mx-auto px-6 text-center">
-        <h1 class="font-heading text-4xl md:text-5xl font-semibold mb-4">Contact Us</h1>
+        <h1 class="font-heading text-4xl md:text-5xl font-semibold mb-4"><?= e($page['hero_title'] ?: 'Contact Us') ?></h1>
         <p class="text-gray-300 text-lg max-w-2xl mx-auto">
-            Ready to improve your workplace safety? Get in touch for a free, no-obligation quote.
+            <?= e($page['hero_subtitle'] ?: 'Ready to improve your workplace safety? Get in touch for a free, no-obligation quote.') ?>
         </p>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- Contact Section -->
 <section class="py-20 bg-cream">
@@ -167,5 +185,15 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </section>
+
+<?php
+// Render additional sections after the contact form (if any)
+$additionalSections = array_filter($sections, function($s) {
+    return !in_array($s['section_type'], ['page_header', 'hero']);
+});
+foreach ($additionalSections as $section):
+    renderSection($section);
+endforeach;
+?>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

@@ -1,16 +1,29 @@
 <?php
 /**
- * About Page
+ * About Page - Section-based with fallback
  */
 require_once __DIR__ . '/config.php';
 require_once INCLUDES_PATH . '/database.php';
 require_once INCLUDES_PATH . '/functions.php';
+require_once INCLUDES_PATH . '/sections.php';
 
 $page = getPage('about');
 $pageTitle = 'About Us | ' . getSetting('site_name', SITE_NAME);
 $metaDescription = $page['meta_description'] ?: 'Learn about Integral Safety Ltd - experienced health and safety consultants serving Leicestershire and the Midlands.';
 
+// Get sections for about page
+$sections = getSections('page', $page['id']);
+$useSections = !empty($sections);
+
 require_once INCLUDES_PATH . '/header.php';
+
+if ($useSections):
+    // Render all sections from the database
+    foreach ($sections as $section):
+        renderSection($section);
+    endforeach;
+else:
+// Fallback: Original hardcoded content when no sections exist
 ?>
 
 <!-- Hero -->
@@ -116,5 +129,7 @@ require_once INCLUDES_PATH . '/header.php';
         </a>
     </div>
 </section>
+
+<?php endif; ?>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

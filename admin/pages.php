@@ -173,10 +173,13 @@ require_once __DIR__ . '/includes/header.php';
                 <td class="px-6 py-4 text-gray-500">
                     <?= formatDate($page['updated_at']) ?>
                 </td>
-                <td class="px-6 py-4 text-right">
+                <td class="px-6 py-4 text-right space-x-2">
+                    <a href="/admin/section-editor.php?type=page&id=<?= $page['id'] ?>"
+                       class="text-orange-500 hover:text-orange-600 font-medium">Edit Sections</a>
+                    <span class="text-gray-300">|</span>
                     <a href="/admin/pages.php?edit=<?= e($page['slug']) ?>"
-                       class="text-orange-500 hover:text-orange-600">Edit</a>
-                    <span class="mx-2 text-gray-300">|</span>
+                       class="text-gray-500 hover:text-gray-700">Settings</a>
+                    <span class="text-gray-300">|</span>
                     <a href="/<?= e($page['slug'] === 'home' ? '' : $page['slug']) ?>" target="_blank"
                        class="text-gray-500 hover:text-gray-700">View</a>
                 </td>

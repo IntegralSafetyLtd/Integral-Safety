@@ -129,6 +129,24 @@ CREATE TABLE `settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
+-- Page sections table (for visual page builder)
+-- --------------------------------------------------------
+CREATE TABLE `page_sections` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_type` enum('page','service','training') NOT NULL DEFAULT 'page',
+  `page_id` int(11) NOT NULL,
+  `section_type` varchar(50) NOT NULL,
+  `section_data` longtext,
+  `sort_order` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_page_type_id` (`page_type`, `page_id`),
+  KEY `idx_sort_order` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
 -- Contact submissions table
 -- --------------------------------------------------------
 CREATE TABLE `contact_submissions` (
