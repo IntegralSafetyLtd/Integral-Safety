@@ -17,7 +17,7 @@ function sanitize($input) {
     if (is_array($input)) {
         return array_map('sanitize', $input);
     }
-    return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
+    return strip_tags(trim($input));
 }
 
 /**
