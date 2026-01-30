@@ -420,18 +420,42 @@ $tabs = [
             <p class="text-sm text-gray-500 mt-1">Official registered company name</p>
         </div>
 
-        <div>
+        <div class="md:col-span-2">
             <label class="block text-gray-700 font-medium mb-2">Logo URL</label>
-            <div class="flex gap-2">
+            <div class="flex gap-2 mb-3">
                 <input type="text" name="seo_schema_logo_url" id="seo_schema_logo_url"
                        value="<?= e(getSetting('seo_schema_logo_url')) ?>"
                        placeholder="/uploads/logo.png"
                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
                 <button type="button" onclick="openGalleryPicker('seo_schema_logo_url')"
                         class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300">
-                    Browse
+                    Browse Gallery
                 </button>
             </div>
+            <?php
+            $siteLogo = getSetting('site_logo');
+            $siteLogoWhite = getSetting('site_logo_white');
+            if ($siteLogo || $siteLogoWhite): ?>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <p class="text-sm text-gray-600 mb-2">Quick select from Site Settings:</p>
+                <div class="flex flex-wrap gap-3">
+                    <?php if ($siteLogo): ?>
+                    <button type="button" onclick="document.getElementById('seo_schema_logo_url').value='<?= e($siteLogo) ?>'"
+                            class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors">
+                        <img src="<?= e($siteLogo) ?>" alt="Site Logo" class="h-8 w-auto max-w-[100px] object-contain">
+                        <span class="text-sm text-gray-600">Colour Logo</span>
+                    </button>
+                    <?php endif; ?>
+                    <?php if ($siteLogoWhite): ?>
+                    <button type="button" onclick="document.getElementById('seo_schema_logo_url').value='<?= e($siteLogoWhite) ?>'"
+                            class="flex items-center gap-2 px-3 py-2 bg-navy-800 border border-gray-600 rounded-lg hover:border-orange-500 transition-colors">
+                        <img src="<?= e($siteLogoWhite) ?>" alt="White Logo" class="h-8 w-auto max-w-[100px] object-contain">
+                        <span class="text-sm text-white">White Logo</span>
+                    </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
 
         <div>
