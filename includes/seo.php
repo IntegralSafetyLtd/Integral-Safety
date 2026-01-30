@@ -415,12 +415,11 @@ function generateSitemap($save = true) {
     $xml .= "        <priority>1.0</priority>\n";
     $xml .= "    </url>\n";
 
-    // Static pages
-    $pages = dbFetchAll("SELECT slug, updated_at FROM pages WHERE is_active = 1");
+    // Static pages (excluding home, which is already added above)
+    $pages = dbFetchAll("SELECT slug, updated_at FROM pages WHERE is_active = 1 AND slug != 'home'");
     foreach ($pages as $page) {
-        $slug = $page['slug'] === 'home' ? '' : $page['slug'];
         $xml .= "    <url>\n";
-        $xml .= "        <loc>" . SITE_URL . "/" . $slug . "</loc>\n";
+        $xml .= "        <loc>" . SITE_URL . "/" . $page['slug'] . "</loc>\n";
         $xml .= "        <lastmod>" . date('Y-m-d', strtotime($page['updated_at'])) . "</lastmod>\n";
         $xml .= "        <changefreq>weekly</changefreq>\n";
         $xml .= "        <priority>0.8</priority>\n";
