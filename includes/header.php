@@ -159,6 +159,7 @@ $seoCanonical = $canonicalUrl ?? null;
                 <a href="/services" class="text-navy-800 font-medium hover:text-orange-500 transition-colors">Services</a>
                 <a href="/training" class="text-navy-800 font-medium hover:text-orange-500 transition-colors">Training</a>
                 <a href="/about" class="text-navy-800 font-medium hover:text-orange-500 transition-colors">About</a>
+                <a href="/blog" class="text-navy-800 font-medium hover:text-orange-500 transition-colors">Blog</a>
                 <a href="/contact" class="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors shadow-md hover:shadow-lg">
                     Contact Us
                 </a>
@@ -179,6 +180,7 @@ $seoCanonical = $canonicalUrl ?? null;
                 <a href="/services" class="block text-navy-800 font-medium hover:text-orange-500">Services</a>
                 <a href="/training" class="block text-navy-800 font-medium hover:text-orange-500">Training</a>
                 <a href="/about" class="block text-navy-800 font-medium hover:text-orange-500">About</a>
+                <a href="/blog" class="block text-navy-800 font-medium hover:text-orange-500">Blog</a>
                 <a href="/contact" class="block bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold text-center hover:bg-orange-600">
                     Contact Us
                 </a>
