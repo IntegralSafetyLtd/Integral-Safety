@@ -178,7 +178,7 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                     <div id="featured_image_preview" class="mt-3">
                         <?php if (!empty($editPost['featured_image'])): ?>
-                        <img src="<?= e($editPost['featured_image']) ?>" class="w-full h-32 object-cover rounded-lg">
+                        <img src="<?= e($editPost['featured_image']) ?>" class="w-[200px] h-[200px] object-cover rounded-lg">
                         <?php endif; ?>
                     </div>
                 </div>

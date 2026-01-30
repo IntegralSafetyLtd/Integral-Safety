@@ -154,7 +154,7 @@ function selectGalleryImage() {
         document.getElementById(galleryTargetField).value = selectedGalleryImage;
         const preview = document.getElementById(galleryTargetField + '_preview');
         if (preview) {
-            preview.innerHTML = '<img src="' + selectedGalleryImage + '" class="w-full h-32 object-cover rounded-lg">';
+            preview.innerHTML = '<img src="' + selectedGalleryImage + '" class="w-[200px] h-[200px] object-cover rounded-lg">';
         }
     }
     closeGalleryPicker();
@@ -216,7 +216,7 @@ async function handleGalleryUpload(file) {
                 document.getElementById(galleryTargetField).value = data.url;
                 const preview = document.getElementById(galleryTargetField + '_preview');
                 if (preview) {
-                    preview.innerHTML = '<img src="' + data.url + '" class="w-full h-32 object-cover rounded-lg">';
+                    preview.innerHTML = '<img src="' + data.url + '" class="w-[200px] h-[200px] object-cover rounded-lg">';
                 }
             }
 
