@@ -4,6 +4,57 @@
 
 This is a PHP-based CMS for Integral Safety Ltd, a health and safety consultancy based in Leicestershire, UK. The site includes public pages, services, training courses, and a full admin panel.
 
+## Deployment Workflow
+
+**IMPORTANT - Follow this order for all changes:**
+
+1. **Push to live server FIRST** - The user works directly on the live site. When they ask to see changes, deploy immediately via SCP:
+   ```bash
+   scp -P 722 "H:/VSProjects/Integral Safety/integral-safety-php/path/to/file.php" krystal:~/public_html/path/to/
+   ```
+
+2. **Commit to Git AFTER** - Once changes are live, commit to the GitHub repository:
+   ```bash
+   cd "H:\VSProjects\Integral Safety\integral-safety-php"
+   git add .
+   git commit -m "Description of changes"
+   git push origin master
+   ```
+
+## Direct Server Access
+
+**You have direct access to the production server and database. Use it.**
+
+- **SSH Access**: `ssh -p 722 krystal` (configured in ~/.ssh/config)
+- **Database**: Run queries directly via SSH + PHP, don't ask the user to run scripts
+- **File Upload**: Use SCP to deploy files immediately
+
+### Running Database Migrations
+
+Instead of asking the user to visit migration URLs, run them directly:
+```bash
+ssh -p 722 krystal 'cd ~/public_html && php -r '\''
+require "config.php";
+require "includes/database.php";
+// Run your queries here
+'\'''
+```
+
+### Quick Commands
+```bash
+# Upload single file
+scp -P 722 "H:/VSProjects/Integral Safety/integral-safety-php/file.php" krystal:~/public_html/
+
+# Upload folder contents
+scp -P 722 "H:/VSProjects/Integral Safety/integral-safety-php/admin/"*.php krystal:~/public_html/admin/
+
+# Check files on server
+ssh -p 722 krystal "ls -la ~/public_html/"
+
+# Run PHP on server
+ssh -p 722 krystal "cd ~/public_html && php -r 'require \"config.php\"; // code here'"
+```
+
 ## Technology Stack
 
 - **Backend**: PHP 8.x (no framework, vanilla PHP)
