@@ -72,12 +72,12 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php foreach ($posts as $post): ?>
                     <article class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
                         <?php if ($post['featured_image']): ?>
-                        <a href="/blog/<?= e($post['slug']) ?>">
+                        <a href="/blog/<?= e($post['slug']) ?>" class="block aspect-[4/3] overflow-hidden">
                             <img src="<?= e($post['featured_image']) ?>" alt="<?= e($post['title']) ?>"
-                                 class="w-full h-48 object-cover">
+                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                         </a>
                         <?php else: ?>
-                        <div class="w-full h-48 bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center">
+                        <div class="aspect-[4/3] bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center">
                             <svg class="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>

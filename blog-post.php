@@ -85,8 +85,10 @@ require_once INCLUDES_PATH . '/header.php';
     <?php if ($post['featured_image']): ?>
     <div class="bg-cream">
         <div class="max-w-4xl mx-auto px-6 -mt-8">
-            <img src="<?= e($post['featured_image']) ?>" alt="<?= e($post['title']) ?>"
-                 class="w-full h-64 md:h-96 object-cover rounded-2xl shadow-xl">
+            <div class="aspect-[3/2] md:aspect-[2/1] overflow-hidden rounded-2xl shadow-xl">
+                <img src="<?= e($post['featured_image']) ?>" alt="<?= e($post['title']) ?>"
+                     class="w-full h-full object-cover">
+            </div>
         </div>
     </div>
     <?php endif; ?>
@@ -139,12 +141,12 @@ require_once INCLUDES_PATH . '/header.php';
             <?php foreach ($relatedPosts as $related): ?>
             <article class="bg-cream rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
                 <?php if ($related['featured_image']): ?>
-                <a href="/blog/<?= e($related['slug']) ?>">
+                <a href="/blog/<?= e($related['slug']) ?>" class="block aspect-[4/3] overflow-hidden">
                     <img src="<?= e($related['featured_image']) ?>" alt="<?= e($related['title']) ?>"
-                         class="w-full h-40 object-cover">
+                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                 </a>
                 <?php else: ?>
-                <div class="w-full h-40 bg-gradient-to-br from-navy-700 to-navy-900"></div>
+                <div class="aspect-[4/3] bg-gradient-to-br from-navy-700 to-navy-900"></div>
                 <?php endif; ?>
                 <div class="p-6">
                     <h3 class="font-heading text-lg font-semibold text-navy-900 mb-2">
