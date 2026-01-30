@@ -8,6 +8,9 @@ require_once __DIR__ . '/database.php';
 // Session timeout in seconds (1 hour)
 define('SESSION_TIMEOUT', 3600);
 
+// Remember token duration (7 days)
+define('REMEMBER_TOKEN_DURATION', 7 * 24 * 60 * 60);
+
 // Login attempt limits
 define('MAX_LOGIN_ATTEMPTS', 5);
 define('LOCKOUT_DURATION', 900); // 15 minutes
@@ -39,15 +42,23 @@ function requireLogin() {
     }
 
     if (!isLoggedIn()) {
-        header('Location: /admin/login.php');
-        exit;
+        // Try to restore session from remember token
+        if (validateRememberToken()) {
+            // Session restored, continue
+        } else {
+            header('Location: /admin/login.php');
+            exit;
+        }
     }
 
     // Check session timeout
     if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT)) {
-        logout();
-        header('Location: /admin/login.php?timeout=1');
-        exit;
+        // Check if we have a valid remember token before logging out
+        if (!validateRememberToken()) {
+            logout();
+            header('Location: /admin/login.php?timeout=1');
+            exit;
+        }
     }
 
     // Check if user needs to set up 2FA
@@ -235,6 +246,9 @@ function completeLogin($userId) {
  * Log out user
  */
 function logout() {
+    // Clear remember token if exists
+    clearRememberToken();
+
     $_SESSION = [];
 
     if (ini_get("session.use_cookies")) {
@@ -446,4 +460,193 @@ function getRecentLoginAttempts($limit = 50) {
         "SELECT la.*, u.name as user_name FROM login_attempts la LEFT JOIN users u ON la.email = u.email ORDER BY la.created_at DESC LIMIT ?",
         [$limit]
     );
+}
+
+/**
+ * Create a remember token for "Trust This Browser" feature
+ */
+function createRememberToken($userId) {
+    // Generate a secure random token
+    $token = bin2hex(random_bytes(32));
+    $tokenHash = hash('sha256', $token);
+
+    $expiresAt = date('Y-m-d H:i:s', time() + REMEMBER_TOKEN_DURATION);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+    // Parse user agent for friendly device info
+    $deviceInfo = parseDeviceInfo($userAgent);
+
+    // Remove any existing tokens for this user on this device (optional: limit tokens per user)
+    // We'll allow multiple devices, but clean up expired ones
+    dbExecute("DELETE FROM remember_tokens WHERE user_id = ? AND expires_at < NOW()", [$userId]);
+
+    // Insert the new token
+    dbExecute(
+        "INSERT INTO remember_tokens (user_id, token_hash, device_info, ip_address, expires_at, last_used_at) VALUES (?, ?, ?, ?, ?, NOW())",
+        [$userId, $tokenHash, $deviceInfo, $ip, $expiresAt]
+    );
+
+    // Set the cookie (HTTP-only, secure, same-site strict)
+    $cookieOptions = [
+        'expires' => time() + REMEMBER_TOKEN_DURATION,
+        'path' => '/admin/',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ];
+
+    setcookie('remember_token', $token, $cookieOptions);
+
+    return true;
+}
+
+/**
+ * Validate remember token and restore session
+ */
+function validateRememberToken() {
+    if (!isset($_COOKIE['remember_token'])) {
+        return false;
+    }
+
+    $token = $_COOKIE['remember_token'];
+    $tokenHash = hash('sha256', $token);
+
+    // Find valid token
+    $tokenRecord = dbFetchOne(
+        "SELECT rt.*, u.id as user_id, u.username, u.email, u.name, u.role, u.is_active
+         FROM remember_tokens rt
+         JOIN users u ON rt.user_id = u.id
+         WHERE rt.token_hash = ? AND rt.expires_at > NOW()",
+        [$tokenHash]
+    );
+
+    if (!$tokenRecord || !$tokenRecord['is_active']) {
+        // Invalid or expired token, clear the cookie
+        clearRememberCookie();
+        return false;
+    }
+
+    // Token is valid - restore session
+    $_SESSION['user_id'] = $tokenRecord['user_id'];
+    $_SESSION['username'] = $tokenRecord['username'];
+    $_SESSION['email'] = $tokenRecord['email'];
+    $_SESSION['name'] = $tokenRecord['name'];
+    $_SESSION['role'] = $tokenRecord['role'];
+    $_SESSION['last_activity'] = time();
+    $_SESSION['auth_complete'] = true;
+
+    // Update last used timestamp
+    dbExecute("UPDATE remember_tokens SET last_used_at = NOW() WHERE token_hash = ?", [$tokenHash]);
+
+    // Rotate the token for extra security (optional but recommended)
+    // This means each token can only be used once to restore a session
+    rotateRememberToken($tokenRecord['user_id'], $tokenHash);
+
+    return true;
+}
+
+/**
+ * Rotate remember token (issue new token, invalidate old)
+ */
+function rotateRememberToken($userId, $oldTokenHash) {
+    // Delete the old token
+    dbExecute("DELETE FROM remember_tokens WHERE token_hash = ?", [$oldTokenHash]);
+
+    // Create a new one
+    createRememberToken($userId);
+}
+
+/**
+ * Clear remember token on logout
+ */
+function clearRememberToken($userId = null) {
+    // Clear cookie
+    clearRememberCookie();
+
+    // If we have a token in cookie, delete it from database
+    if (isset($_COOKIE['remember_token'])) {
+        $tokenHash = hash('sha256', $_COOKIE['remember_token']);
+        dbExecute("DELETE FROM remember_tokens WHERE token_hash = ?", [$tokenHash]);
+    }
+
+    // If user ID provided, optionally clear all tokens for user (full logout from all devices)
+    // We won't do this by default - user can do it from trusted devices page
+}
+
+/**
+ * Clear the remember cookie
+ */
+function clearRememberCookie() {
+    $cookieOptions = [
+        'expires' => time() - 3600,
+        'path' => '/admin/',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ];
+    setcookie('remember_token', '', $cookieOptions);
+}
+
+/**
+ * Revoke a specific remember token by ID
+ */
+function revokeRememberToken($tokenId, $userId) {
+    return dbExecute("DELETE FROM remember_tokens WHERE id = ? AND user_id = ?", [$tokenId, $userId]);
+}
+
+/**
+ * Revoke all remember tokens for a user (logout from all devices)
+ */
+function revokeAllRememberTokens($userId) {
+    return dbExecute("DELETE FROM remember_tokens WHERE user_id = ?", [$userId]);
+}
+
+/**
+ * Get all trusted devices for a user
+ */
+function getTrustedDevices($userId) {
+    return dbFetchAll(
+        "SELECT id, device_info, ip_address, created_at, last_used_at, expires_at
+         FROM remember_tokens
+         WHERE user_id = ? AND expires_at > NOW()
+         ORDER BY last_used_at DESC",
+        [$userId]
+    );
+}
+
+/**
+ * Parse user agent into friendly device info
+ */
+function parseDeviceInfo($userAgent) {
+    $device = 'Unknown Device';
+    $browser = 'Unknown Browser';
+
+    // Detect browser
+    if (strpos($userAgent, 'Firefox') !== false) {
+        $browser = 'Firefox';
+    } elseif (strpos($userAgent, 'Edg') !== false) {
+        $browser = 'Edge';
+    } elseif (strpos($userAgent, 'Chrome') !== false) {
+        $browser = 'Chrome';
+    } elseif (strpos($userAgent, 'Safari') !== false) {
+        $browser = 'Safari';
+    } elseif (strpos($userAgent, 'Opera') !== false || strpos($userAgent, 'OPR') !== false) {
+        $browser = 'Opera';
+    }
+
+    // Detect OS
+    if (strpos($userAgent, 'Windows') !== false) {
+        $device = 'Windows';
+    } elseif (strpos($userAgent, 'Mac') !== false) {
+        $device = 'Mac';
+    } elseif (strpos($userAgent, 'Linux') !== false) {
+        $device = 'Linux';
+    } elseif (strpos($userAgent, 'Android') !== false) {
+        $device = 'Android';
+    } elseif (strpos($userAgent, 'iPhone') !== false || strpos($userAgent, 'iPad') !== false) {
+        $device = 'iOS';
+    }
+
+    return $browser . ' on ' . $device;
 }

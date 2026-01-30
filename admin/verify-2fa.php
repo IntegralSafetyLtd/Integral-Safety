@@ -70,6 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['code'])) {
         if ($valid) {
             // Complete login
             if (completeLogin($userId)) {
+                // Create remember token if "Trust this browser" was checked
+                if (isset($_POST['trust_browser']) && $_POST['trust_browser'] === '1') {
+                    createRememberToken($userId);
+                }
                 header('Location: /admin/');
                 exit;
             } else {
@@ -160,6 +164,15 @@ if (!$emailSent && ($method === 'email' || $method === 'both') && $_SERVER['REQU
                            placeholder="000000"
                            autofocus>
                     <p class="text-gray-500 text-sm mt-2">Enter the 6-digit code</p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="trust_browser" value="1"
+                               class="w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500">
+                        <span class="text-gray-700">Trust this browser for 7 days</span>
+                    </label>
+                    <p class="text-gray-500 text-xs mt-1 ml-8">You won't need to enter a code on this device for a week</p>
                 </div>
 
                 <button type="submit"

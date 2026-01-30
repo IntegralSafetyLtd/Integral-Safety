@@ -129,6 +129,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_settings'])) {
     }
 }
 
+// Handle revoke trusted device
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['revoke_device'])) {
+    if (verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+        $tokenId = intval($_POST['token_id'] ?? 0);
+        if ($tokenId > 0) {
+            revokeRememberToken($tokenId, $_SESSION['user_id']);
+            $_SESSION['flash_message'] = 'Device removed from trusted list.';
+            $_SESSION['flash_type'] = 'success';
+        }
+        header('Location: /admin/settings.php#trusted-devices');
+        exit;
+    }
+}
+
+// Handle revoke all trusted devices
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['revoke_all_devices'])) {
+    if (verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+        revokeAllRememberTokens($_SESSION['user_id']);
+        $_SESSION['flash_message'] = 'All trusted devices have been removed. You will need to verify 2FA on your next login.';
+        $_SESSION['flash_type'] = 'success';
+        header('Location: /admin/settings.php#trusted-devices');
+        exit;
+    }
+}
+
 // Handle password change
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     if (verifyCSRFToken($_POST['csrf_token'] ?? '')) {
@@ -360,6 +385,76 @@ require_once __DIR__ . '/includes/header.php';
             <p class="text-gray-600">Email: <?= e($_SESSION['email']) ?></p>
         </div>
     </div>
+</div>
+
+<!-- Trusted Devices Section -->
+<div class="bg-white rounded-lg shadow p-6 mt-8" id="trusted-devices">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800">Trusted Devices</h2>
+            <p class="text-sm text-gray-500">Devices where you've checked "Trust this browser" won't require 2FA for 7 days.</p>
+        </div>
+        <?php $trustedDevices = getTrustedDevices($_SESSION['user_id']); ?>
+        <?php if (count($trustedDevices) > 0): ?>
+        <form method="POST" onsubmit="return confirm('This will log you out of all trusted devices. Continue?');">
+            <?= csrfField() ?>
+            <input type="hidden" name="revoke_all_devices" value="1">
+            <button type="submit" class="text-sm text-red-600 hover:text-red-800 font-medium">
+                Remove All
+            </button>
+        </form>
+        <?php endif; ?>
+    </div>
+
+    <?php if (empty($trustedDevices)): ?>
+    <div class="text-center py-8 text-gray-500">
+        <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        <p>No trusted devices</p>
+        <p class="text-sm">When you log in and check "Trust this browser", it will appear here.</p>
+    </div>
+    <?php else: ?>
+    <div class="space-y-3">
+        <?php foreach ($trustedDevices as $device): ?>
+        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-navy-100 rounded-full flex items-center justify-center">
+                    <?php if (strpos($device['device_info'], 'Windows') !== false): ?>
+                    <svg class="w-5 h-5 text-navy-600" fill="currentColor" viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+                    <?php elseif (strpos($device['device_info'], 'Mac') !== false || strpos($device['device_info'], 'iOS') !== false): ?>
+                    <svg class="w-5 h-5 text-navy-600" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                    <?php elseif (strpos($device['device_info'], 'Android') !== false): ?>
+                    <svg class="w-5 h-5 text-navy-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 2.295l1.068-1.924a.4.4 0 00-.7-.387l-1.084 1.95a8.016 8.016 0 00-3.307-.7c-1.208 0-2.34.262-3.307.7L8.109-.016a.4.4 0 00-.7.387l1.068 1.924C6.015 3.578 4.5 5.818 4.5 8.408h15c0-2.59-1.515-4.83-3.977-6.113zM8.5 6.408a.75.75 0 110-1.5.75.75 0 010 1.5zm7 0a.75.75 0 110-1.5.75.75 0 010 1.5zM5 9.908v7.5a1.5 1.5 0 001.5 1.5H8v3a1.5 1.5 0 003 0v-3h2v3a1.5 1.5 0 003 0v-3h1.5a1.5 1.5 0 001.5-1.5v-7.5H5zm-3 0a1.5 1.5 0 00-1.5 1.5v5a1.5 1.5 0 003 0v-5a1.5 1.5 0 00-1.5-1.5zm20 0a1.5 1.5 0 00-1.5 1.5v5a1.5 1.5 0 003 0v-5a1.5 1.5 0 00-1.5-1.5z"/></svg>
+                    <?php else: ?>
+                    <svg class="w-5 h-5 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <?php endif; ?>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-800"><?= e($device['device_info']) ?></p>
+                    <p class="text-sm text-gray-500">
+                        IP: <?= e($device['ip_address']) ?>
+                        &middot; Last used: <?= $device['last_used_at'] ? date('j M Y, g:ia', strtotime($device['last_used_at'])) : 'Never' ?>
+                    </p>
+                    <p class="text-xs text-gray-400">
+                        Expires: <?= date('j M Y', strtotime($device['expires_at'])) ?>
+                    </p>
+                </div>
+            </div>
+            <form method="POST">
+                <?= csrfField() ?>
+                <input type="hidden" name="revoke_device" value="1">
+                <input type="hidden" name="token_id" value="<?= $device['id'] ?>">
+                <button type="submit" class="text-red-600 hover:text-red-800 p-2" title="Remove this device">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
