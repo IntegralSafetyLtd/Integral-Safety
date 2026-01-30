@@ -35,6 +35,9 @@ Options -Indexes
     Deny from all
 </Directory>
 
+# Dynamic robots.txt
+RewriteRule ^robots\.txt$ robots.php [L]
+
 # Clean URLs - Services
 RewriteRule ^services/?$ services.php [L,QSA]
 RewriteRule ^services/([a-z0-9-]+)/?$ service.php?slug=$1 [L,QSA]

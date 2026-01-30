@@ -28,9 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'hero_subtitle' => sanitize($_POST['hero_subtitle']),
             'hero_image' => sanitize($_POST['hero_image']),
             'content' => $_POST['content'], // Allow HTML from editor
+            'seo_title' => sanitize($_POST['seo_title'] ?? ''),
+            'focus_keyphrase' => sanitize($_POST['focus_keyphrase'] ?? ''),
+            'canonical_url' => sanitize($_POST['canonical_url'] ?? ''),
+            'robots_directive' => sanitize($_POST['robots_directive'] ?? 'index, follow'),
+            'og_image' => sanitize($_POST['og_image'] ?? ''),
         ];
 
-        $sql = "UPDATE pages SET title = ?, meta_description = ?, meta_keywords = ?, hero_title = ?, hero_subtitle = ?, hero_image = ?, content = ? WHERE slug = ?";
+        $sql = "UPDATE pages SET title = ?, meta_description = ?, meta_keywords = ?, hero_title = ?, hero_subtitle = ?, hero_image = ?, content = ?, seo_title = ?, focus_keyphrase = ?, canonical_url = ?, robots_directive = ?, og_image = ? WHERE slug = ?";
         $params = array_values($data);
         $params[] = $slug;
 
@@ -98,6 +103,72 @@ require_once __DIR__ . '/includes/header.php';
             <label class="block text-gray-700 font-medium mb-2">Meta Keywords (SEO)</label>
             <input type="text" name="meta_keywords" value="<?= e($editPage['meta_keywords']) ?>"
                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+        </div>
+
+        <!-- SEO Settings Section -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                SEO Settings
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">SEO Title</label>
+                    <input type="text" name="seo_title" id="seo_title" value="<?= e($editPage['seo_title'] ?? '') ?>"
+                           maxlength="70"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                           placeholder="Custom title for search results (max 70 chars)">
+                    <div class="flex justify-between mt-1">
+                        <p class="text-sm text-gray-500">Overrides page title in search results</p>
+                        <span id="seo_title_counter" class="text-sm text-gray-500"><span id="seo_title_count">0</span>/70</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Focus Keyphrase</label>
+                    <input type="text" name="focus_keyphrase" value="<?= e($editPage['focus_keyphrase'] ?? '') ?>"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                           placeholder="e.g., fire risk assessment leicestershire">
+                    <p class="text-sm text-gray-500 mt-1">Target keyword for this page</p>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Canonical URL</label>
+                    <input type="text" name="canonical_url" value="<?= e($editPage['canonical_url'] ?? '') ?>"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                           placeholder="Leave blank for default">
+                    <p class="text-sm text-gray-500 mt-1">Only set if this content exists elsewhere</p>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Robots Directive</label>
+                    <select name="robots_directive"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <option value="index, follow" <?= ($editPage['robots_directive'] ?? 'index, follow') === 'index, follow' ? 'selected' : '' ?>>index, follow (Default)</option>
+                        <option value="index, nofollow" <?= ($editPage['robots_directive'] ?? '') === 'index, nofollow' ? 'selected' : '' ?>>index, nofollow</option>
+                        <option value="noindex, follow" <?= ($editPage['robots_directive'] ?? '') === 'noindex, follow' ? 'selected' : '' ?>>noindex, follow</option>
+                        <option value="noindex, nofollow" <?= ($editPage['robots_directive'] ?? '') === 'noindex, nofollow' ? 'selected' : '' ?>>noindex, nofollow</option>
+                    </select>
+                    <p class="text-sm text-gray-500 mt-1">Control search engine indexing</p>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 font-medium mb-2">Open Graph Image</label>
+                    <div class="flex gap-2">
+                        <input type="text" name="og_image" id="og_image" value="<?= e($editPage['og_image'] ?? '') ?>"
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                               placeholder="Leave blank to use default">
+                        <button type="button" onclick="openGalleryPicker('og_image')"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300">
+                            Browse
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">Image shown when shared on social media (1200x630 recommended)</p>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -270,6 +341,29 @@ function selectGalleryImage() {
     }
     closeGalleryPicker();
 }
+
+// SEO Title character counter
+document.addEventListener('DOMContentLoaded', function() {
+    const seoTitleInput = document.getElementById('seo_title');
+    const seoTitleCount = document.getElementById('seo_title_count');
+
+    if (seoTitleInput && seoTitleCount) {
+        function updateCount() {
+            const count = seoTitleInput.value.length;
+            seoTitleCount.textContent = count;
+            if (count > 60) {
+                seoTitleCount.parentElement.classList.add('text-orange-500');
+                seoTitleCount.parentElement.classList.remove('text-gray-500');
+            } else {
+                seoTitleCount.parentElement.classList.remove('text-orange-500');
+                seoTitleCount.parentElement.classList.add('text-gray-500');
+            }
+        }
+
+        seoTitleInput.addEventListener('input', updateCount);
+        updateCount(); // Initial count
+    }
+});
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

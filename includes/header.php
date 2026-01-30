@@ -2,6 +2,8 @@
 /**
  * Public Header Template
  */
+require_once __DIR__ . '/seo.php';
+
 $siteName = getSetting('site_name', SITE_NAME);
 $siteTagline = getSetting('site_tagline', 'Health & Safety Consultants');
 $contactPhone = getSetting('contact_phone', '01530 382 150');
@@ -9,24 +11,34 @@ $contactPhone2 = getSetting('contact_phone_2', '');
 $contactEmail = getSetting('contact_email', SITE_EMAIL);
 $siteLogo = getSetting('site_logo', '/assets/images/logo.png');
 $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
+
+// SEO variables (can be set by individual pages before including header)
+$seoTitle = $seoTitle ?? ($pageTitle ?? $siteName);
+$seoDescription = $metaDescription ?? 'Health & Safety Consultants in Leicestershire. Fire risk assessments, IOSH training, and consultancy services.';
+$seoImage = $ogImage ?? getSetting('seo_default_og_image', '');
+$seoRobots = $robotsDirective ?? null;
+$seoCanonical = $canonicalUrl ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($pageTitle ?? $siteName) ?></title>
-    <meta name="description" content="<?= e($metaDescription ?? 'Health & Safety Consultants in Leicestershire. Fire risk assessments, IOSH training, and consultancy services.') ?>">
+    <title><?= e(generatePageTitle($seoTitle)) ?></title>
+    <meta name="description" content="<?= e($seoDescription) ?>">
     <?php if (!empty($metaKeywords)): ?>
     <meta name="keywords" content="<?= e($metaKeywords) ?>">
     <?php endif; ?>
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="<?= e($pageTitle ?? $siteName) ?>">
-    <meta property="og:description" content="<?= e($metaDescription ?? '') ?>">
-    <meta property="og:url" content="<?= SITE_URL . $_SERVER['REQUEST_URI'] ?>">
-    <meta property="og:site_name" content="<?= e($siteName) ?>">
+    <?php outputRobotsTag($seoRobots); ?>
+    <?php outputCanonicalUrl($seoCanonical); ?>
+    <?php outputVerificationTags(); ?>
+    <?php outputOpenGraphTags([
+        'title' => $seoTitle,
+        'description' => $seoDescription,
+        'image' => $seoImage,
+        'type' => $ogType ?? 'website',
+    ]); ?>
 
     <!-- Favicon -->
     <link rel="icon" href="<?= e($siteFavicon) ?>">
@@ -104,27 +116,12 @@ $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
         .animation-delay-4000 { animation-delay: 4s; }
     </style>
 
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "<?= e($siteName) ?>",
-        "description": "Health and safety consultants providing fire risk assessments, IOSH training, and consultancy services in Leicestershire.",
-        "telephone": "<?= e($contactPhone) ?>",
-        "email": "<?= e($contactEmail) ?>",
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Coalville",
-            "addressRegion": "Leicestershire",
-            "addressCountry": "GB"
-        },
-        "areaServed": ["Leicestershire", "Midlands", "UK"],
-        "priceRange": "££"
-    }
-    </script>
+    <?php outputStructuredData(); ?>
+    <?php outputHeadAnalytics(); ?>
 </head>
 <body class="bg-cream text-navy-900 antialiased">
+    <?php outputBodyAnalytics(); ?>
+
     <!-- Top Bar -->
     <div class="bg-navy-900 text-white py-2.5 text-sm">
         <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
