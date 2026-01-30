@@ -890,21 +890,48 @@ function closeGalleryPicker() {
 
 function loadGalleryImages() {
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    // Site logos from settings
+    const siteLogos = [];
+    <?php if ($siteLogo = getSetting('site_logo')): ?>
+    siteLogos.push({ url: '<?= e($siteLogo) ?>', label: 'Site Logo (Colour)', bg: 'bg-gray-100' });
+    <?php endif; ?>
+    <?php if ($siteLogoWhite = getSetting('site_logo_white')): ?>
+    siteLogos.push({ url: '<?= e($siteLogoWhite) ?>', label: 'Site Logo (White)', bg: 'bg-navy-800' });
+    <?php endif; ?>
+
     fetch('/admin/api/gallery-images.php?csrf_token=' + encodeURIComponent(csrfToken))
         .then(res => res.json())
         .then(data => {
             const grid = document.getElementById('galleryGrid');
+            let html = '';
+
+            // Add site logos first
+            if (siteLogos.length > 0) {
+                html += '<div class="col-span-full text-sm font-medium text-gray-600 mb-1">Site Logos</div>';
+                html += siteLogos.map(logo => `
+                    <div class="cursor-pointer border-2 border-transparent rounded-lg overflow-hidden hover:border-orange-300 transition-colors gallery-item ${logo.bg}"
+                         data-url="${logo.url}"
+                         onclick="highlightGalleryImage(this, '${logo.url}')">
+                        <img src="${logo.url}" alt="${logo.label}" class="w-full h-24 object-contain p-2">
+                    </div>
+                `).join('');
+                html += '<div class="col-span-full text-sm font-medium text-gray-600 mt-4 mb-1">Gallery Images</div>';
+            }
+
             if (data.success && data.images.length > 0) {
-                grid.innerHTML = data.images.map(img => `
+                html += data.images.map(img => `
                     <div class="cursor-pointer border-2 border-transparent rounded-lg overflow-hidden hover:border-orange-300 transition-colors gallery-item"
                          data-url="/uploads/${img.filename}"
                          onclick="highlightGalleryImage(this, '/uploads/${img.filename}')">
                         <img src="/uploads/${img.filename}" alt="${img.alt_text || ''}" class="w-full h-24 object-cover">
                     </div>
                 `).join('');
-            } else {
-                grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">No images in gallery. Upload images via the Gallery page.</p>';
+            } else if (siteLogos.length === 0) {
+                html = '<p class="col-span-full text-center text-gray-500 py-8">No images in gallery. Upload images via the Gallery page.</p>';
             }
+
+            grid.innerHTML = html;
         })
         .catch(err => {
             console.error('Error loading gallery:', err);
