@@ -135,6 +135,12 @@ Always run migrations through the browser interface, not directly via CLI.
 - **DO NOT** use browser `alert()` or `confirm()` dialogs - use styled modals/toasts
 - **DO NOT** add emojis unless explicitly requested
 
+### Writing Style (for content, blog posts, copy)
+- **DO NOT** use en dashes (–) as separators in sentences - this is a telltale AI writing pattern
+- Instead of "This is important – it affects everyone", write "This is important, it affects everyone" or restructure the sentence
+- Use commas, semicolons, or rewrite sentences to avoid the "word – word" pattern
+- Write naturally as a human would - avoid overly formal or structured phrasing
+
 ## Coding Conventions
 
 ### PHP
