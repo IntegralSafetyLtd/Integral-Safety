@@ -462,6 +462,24 @@ function generateSitemap($save = true) {
         $xml .= "    </url>\n";
     }
 
+    // Blog listing page
+    $xml .= "    <url>\n";
+    $xml .= "        <loc>" . SITE_URL . "/blog</loc>\n";
+    $xml .= "        <changefreq>daily</changefreq>\n";
+    $xml .= "        <priority>0.8</priority>\n";
+    $xml .= "    </url>\n";
+
+    // Blog posts
+    $blogPosts = dbFetchAll("SELECT slug, updated_at FROM blog_posts WHERE status = 'published' OR (status = 'scheduled' AND published_at <= NOW())");
+    foreach ($blogPosts as $post) {
+        $xml .= "    <url>\n";
+        $xml .= "        <loc>" . SITE_URL . "/blog/" . $post['slug'] . "</loc>\n";
+        $xml .= "        <lastmod>" . date('Y-m-d', strtotime($post['updated_at'])) . "</lastmod>\n";
+        $xml .= "        <changefreq>weekly</changefreq>\n";
+        $xml .= "        <priority>0.6</priority>\n";
+        $xml .= "    </url>\n";
+    }
+
     // Location-specific landing pages
     $locationPages = [
         'health-and-safety-consultants-leicester',

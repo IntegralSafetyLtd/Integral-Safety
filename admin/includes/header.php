@@ -53,6 +53,7 @@ $siteFavicon = getSetting('site_favicon', '/assets/images/favicon.png');
                         <a href="/admin/services.php" class="px-3 py-2 rounded <?= $currentPage === 'services' ? 'bg-navy-700' : 'hover:bg-navy-700' ?>">Services</a>
                         <a href="/admin/training.php" class="px-3 py-2 rounded <?= $currentPage === 'training' ? 'bg-navy-700' : 'hover:bg-navy-700' ?>">Training</a>
                         <a href="/admin/testimonials.php" class="px-3 py-2 rounded <?= $currentPage === 'testimonials' ? 'bg-navy-700' : 'hover:bg-navy-700' ?>">Testimonials</a>
+                        <a href="/admin/blog.php" class="px-3 py-2 rounded <?= $currentPage === 'blog' ? 'bg-navy-700' : 'hover:bg-navy-700' ?>">Blog</a>
                         <a href="/admin/gallery.php" class="px-3 py-2 rounded <?= $currentPage === 'gallery' ? 'bg-navy-700' : 'hover:bg-navy-700' ?>">Gallery</a>
                         <a href="/admin/seo.php" class="px-3 py-2 rounded <?= $currentPage === 'seo' ? 'bg-navy-700' : 'hover:bg-navy-700' ?>">SEO</a>
                     </div>
