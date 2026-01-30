@@ -52,6 +52,23 @@ RewriteRule ^contact/?$ contact.php [L,QSA]
 RewriteRule ^privacy/?$ privacy.php [L,QSA]
 RewriteRule ^terms/?$ terms.php [L,QSA]
 
+# Clean URLs - Location Pages
+RewriteRule ^(health-and-safety-consultants-leicester)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-consultants-nottingham)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-consultants-derby)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-consultants-loughborough)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-east-midlands)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(fire-risk-assessments-leicester)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(fire-risk-assessments-nottingham)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(fire-risk-assessments-derby)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(fire-risk-assessments-loughborough)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(fire-risk-assessments-east-midlands)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-training-leicester)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-training-nottingham)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-training-derby)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-training-loughborough)/?$ location.php?slug=$1 [L,QSA]
+RewriteRule ^(health-and-safety-training-east-midlands)/?$ location.php?slug=$1 [L,QSA]
+
 # Admin area (no rewriting needed, direct access)
 # /admin/ works as-is
 

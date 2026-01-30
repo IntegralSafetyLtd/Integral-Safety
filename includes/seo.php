@@ -462,6 +462,32 @@ function generateSitemap($save = true) {
         $xml .= "    </url>\n";
     }
 
+    // Location-specific landing pages
+    $locationPages = [
+        'health-and-safety-consultants-leicester',
+        'health-and-safety-consultants-nottingham',
+        'health-and-safety-consultants-derby',
+        'health-and-safety-consultants-loughborough',
+        'health-and-safety-east-midlands',
+        'fire-risk-assessments-leicester',
+        'fire-risk-assessments-nottingham',
+        'fire-risk-assessments-derby',
+        'fire-risk-assessments-loughborough',
+        'fire-risk-assessments-east-midlands',
+        'health-and-safety-training-leicester',
+        'health-and-safety-training-nottingham',
+        'health-and-safety-training-derby',
+        'health-and-safety-training-loughborough',
+        'health-and-safety-training-east-midlands',
+    ];
+    foreach ($locationPages as $slug) {
+        $xml .= "    <url>\n";
+        $xml .= "        <loc>" . SITE_URL . "/" . $slug . "</loc>\n";
+        $xml .= "        <changefreq>monthly</changefreq>\n";
+        $xml .= "        <priority>0.8</priority>\n";
+        $xml .= "    </url>\n";
+    }
+
     $xml .= '</urlset>';
 
     if ($save) {
