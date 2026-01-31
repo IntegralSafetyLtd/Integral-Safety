@@ -284,6 +284,18 @@ function outputStructuredData() {
         $schema['sameAs'] = $sameAs;
     }
 
+    // Aggregate Rating from testimonials
+    $ratingStats = dbFetchOne("SELECT AVG(rating) as avg_rating, COUNT(*) as review_count FROM testimonials WHERE is_active = 1 AND rating > 0");
+    if ($ratingStats && $ratingStats['review_count'] > 0) {
+        $schema['aggregateRating'] = [
+            '@type' => 'AggregateRating',
+            'ratingValue' => round($ratingStats['avg_rating'], 1),
+            'bestRating' => 5,
+            'worstRating' => 1,
+            'ratingCount' => (int)$ratingStats['review_count']
+        ];
+    }
+
     echo "\n    <!-- Structured Data -->\n";
     echo '    <script type="application/ld+json">' . "\n";
     echo '    ' . json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

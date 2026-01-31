@@ -45,6 +45,16 @@ foreach ($sections as $section) {
 
 $relatedCourses = dbFetchAll("SELECT * FROM training WHERE id != ? AND is_active = 1 ORDER BY RAND() LIMIT 3", [$course['id']]);
 
+// Get related blog post if one is linked and is live
+$relatedBlog = null;
+if (!empty($course['related_blog_id'])) {
+    $relatedBlog = dbFetchOne(
+        "SELECT id, title, slug, excerpt, featured_image FROM blog_posts
+         WHERE id = ? AND (status = 'published' OR (status = 'scheduled' AND published_at <= NOW()))",
+        [$course['related_blog_id']]
+    );
+}
+
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
@@ -236,6 +246,23 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
                 <?php endif; ?>
 
+                <!-- Related Blog Post -->
+                <?php if ($relatedBlog): ?>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <h3 class="font-heading text-lg font-semibold text-navy-900 mb-4">Learn More</h3>
+                    <?php if (!empty($relatedBlog['featured_image'])): ?>
+                    <a href="/blog/<?= e($relatedBlog['slug']) ?>" class="block mb-4">
+                        <img src="<?= e($relatedBlog['featured_image']) ?>" alt="<?= e($relatedBlog['title']) ?>" class="w-full h-32 object-cover rounded-lg">
+                    </a>
+                    <?php endif; ?>
+                    <p class="text-gray-600 text-sm mb-4"><?= e($relatedBlog['excerpt'] ?: 'Read our detailed guide on this topic.') ?></p>
+                    <a href="/blog/<?= e($relatedBlog['slug']) ?>" class="inline-flex items-center gap-2 text-orange-500 font-semibold hover:text-orange-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        Read Our Blog
+                    </a>
+                </div>
+                <?php endif; ?>
+
                 <!-- Contact Card -->
                 <div class="bg-navy-900 rounded-2xl p-6 text-white">
                     <h3 class="font-heading text-lg font-semibold mb-3">Ready to Book?</h3>
@@ -274,5 +301,54 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </section>
+
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "<?= SITE_URL ?>"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Training",
+            "item": "<?= SITE_URL ?>/training"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": <?= json_encode($course['title']) ?>,
+            "item": "<?= SITE_URL ?>/training/<?= e($course['slug']) ?>"
+        }
+    ]
+}
+</script>
+
+<!-- Course Schema -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Course",
+    "name": <?= json_encode($course['title']) ?>,
+    "description": <?= json_encode($course['meta_description'] ?: $course['short_description']) ?>,
+    "provider": {
+        "@type": "Organization",
+        "name": "<?= e(getSetting('site_name', SITE_NAME)) ?>",
+        "url": "<?= SITE_URL ?>"
+    }
+    <?php if ($course['duration']): ?>
+    ,"timeRequired": <?= json_encode($course['duration']) ?>
+    <?php endif; ?>
+    <?php if ($course['certification']): ?>
+    ,"educationalCredentialAwarded": <?= json_encode($course['certification']) ?>
+    <?php endif; ?>
+}
+</script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

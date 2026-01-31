@@ -179,6 +179,34 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 </section>
 
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "<?= SITE_URL ?>"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "<?= SITE_URL ?>/blog"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": <?= json_encode($post['title']) ?>,
+            "item": "<?= SITE_URL ?>/blog/<?= e($post['slug']) ?>"
+        }
+    ]
+}
+</script>
+
 <!-- Article Schema -->
 <script type="application/ld+json">
 {
@@ -186,16 +214,31 @@ require_once INCLUDES_PATH . '/header.php';
     "@type": "Article",
     "headline": <?= json_encode($post['title']) ?>,
     "description": <?= json_encode($metaDescription) ?>,
-    "image": <?= json_encode($ogImage ? SITE_URL . $ogImage : '') ?>,
+    <?php if ($ogImage): ?>
+    "image": {
+        "@type": "ImageObject",
+        "url": "<?= SITE_URL ?><?= e($ogImage) ?>",
+        "width": 1200,
+        "height": 630
+    },
+    <?php endif; ?>
     "datePublished": <?= json_encode(date('c', strtotime($post['published_at']))) ?>,
     "dateModified": <?= json_encode(date('c', strtotime($post['updated_at']))) ?>,
+    "wordCount": <?= $wordCount ?>,
+    <?php if ($post['category']): ?>
+    "articleSection": <?= json_encode($post['category']) ?>,
+    <?php endif; ?>
+    <?php if (!empty($post['focus_keyphrase'])): ?>
+    "keywords": <?= json_encode($post['focus_keyphrase']) ?>,
+    <?php endif; ?>
     "author": {
         "@type": "Organization",
-        "name": "Integral Safety Ltd"
+        "name": "<?= e(getSetting('site_name', SITE_NAME)) ?>",
+        "url": "<?= SITE_URL ?>"
     },
     "publisher": {
         "@type": "Organization",
-        "name": "Integral Safety Ltd",
+        "name": "<?= e(getSetting('site_name', SITE_NAME)) ?>",
         "logo": {
             "@type": "ImageObject",
             "url": "<?= SITE_URL ?><?= e(getSetting('site_logo', '/assets/images/logo.png')) ?>"
@@ -204,7 +247,9 @@ require_once INCLUDES_PATH . '/header.php';
     "mainEntityOfPage": {
         "@type": "WebPage",
         "@id": "<?= SITE_URL ?>/blog/<?= e($post['slug']) ?>"
-    }
+    },
+    "isAccessibleForFree": true,
+    "inLanguage": "en-GB"
 }
 </script>
 

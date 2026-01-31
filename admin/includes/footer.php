@@ -57,6 +57,34 @@
                 }
             });
         });
+
+        // SEO Character counters
+        function setupCharCounter(inputId, counterId, maxLength) {
+            var input = document.getElementById(inputId);
+            var counter = document.getElementById(counterId);
+            if (input && counter) {
+                function updateCount() {
+                    var length = input.value.length;
+                    counter.textContent = length;
+                    if (length > maxLength) {
+                        counter.classList.add('text-red-500');
+                        counter.classList.remove('text-gray-500');
+                    } else if (length > maxLength * 0.9) {
+                        counter.classList.add('text-orange-500');
+                        counter.classList.remove('text-gray-500', 'text-red-500');
+                    } else {
+                        counter.classList.add('text-gray-500');
+                        counter.classList.remove('text-red-500', 'text-orange-500');
+                    }
+                }
+                input.addEventListener('input', updateCount);
+                updateCount(); // Initial count
+            }
+        }
+
+        // Initialize SEO counters if elements exist
+        setupCharCounter('seo_title', 'seo_title_count', 70);
+        setupCharCounter('meta_description', 'meta_description_count', 160);
     </script>
 </body>
 </html>

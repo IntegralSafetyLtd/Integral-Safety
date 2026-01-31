@@ -45,15 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'canonical_url' => sanitize($_POST['canonical_url'] ?? ''),
             'robots_directive' => sanitize($_POST['robots_directive'] ?? 'index, follow'),
             'og_image' => sanitize($_POST['og_image'] ?? ''),
+            'related_blog_id' => !empty($_POST['related_blog_id']) ? (int)$_POST['related_blog_id'] : null,
         ];
 
         if ($editId) {
-            $sql = "UPDATE training SET title=?, slug=?, short_description=?, content=?, duration=?, certification=?, delivery_method=?, meta_description=?, show_on_homepage=?, sort_order=?, is_active=?, seo_title=?, focus_keyphrase=?, canonical_url=?, robots_directive=?, og_image=? WHERE id=?";
+            $sql = "UPDATE training SET title=?, slug=?, short_description=?, content=?, duration=?, certification=?, delivery_method=?, meta_description=?, show_on_homepage=?, sort_order=?, is_active=?, seo_title=?, focus_keyphrase=?, canonical_url=?, robots_directive=?, og_image=?, related_blog_id=? WHERE id=?";
             $params = array_values($data);
             $params[] = $editId;
             $success = dbExecute($sql, $params);
         } else {
-            $sql = "INSERT INTO training (title, slug, short_description, content, duration, certification, delivery_method, meta_description, show_on_homepage, sort_order, is_active, seo_title, focus_keyphrase, canonical_url, robots_directive, og_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO training (title, slug, short_description, content, duration, certification, delivery_method, meta_description, show_on_homepage, sort_order, is_active, seo_title, focus_keyphrase, canonical_url, robots_directive, og_image, related_blog_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $success = dbExecute($sql, array_values($data));
         }
 
@@ -74,6 +75,9 @@ if ($editId) {
 }
 
 $courses = dbFetchAll("SELECT * FROM training ORDER BY sort_order ASC, title ASC");
+
+// Get blog posts for related blog dropdown
+$blogPosts = dbFetchAll("SELECT id, title FROM blog_posts ORDER BY title ASC");
 
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -138,8 +142,12 @@ require_once __DIR__ . '/includes/header.php';
 
         <div class="mb-6">
             <label class="block text-gray-700 font-medium mb-2">Meta Description (SEO)</label>
-            <textarea name="meta_description" rows="2"
+            <textarea name="meta_description" id="meta_description" rows="2" maxlength="160"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"><?= e($editCourse['meta_description'] ?? '') ?></textarea>
+            <div class="flex justify-between mt-1">
+                <p class="text-sm text-gray-500">Shown in search results (recommended: 150-160 characters)</p>
+                <span class="text-sm text-gray-500"><span id="meta_description_count">0</span>/160</span>
+            </div>
         </div>
 
         <!-- SEO Settings Section -->
@@ -206,6 +214,20 @@ require_once __DIR__ . '/includes/header.php';
                     <p class="text-sm text-gray-500 mt-1">Image shown when shared on social media (1200x630 recommended)</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Related Blog Post -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-medium mb-2">Related Blog Post</label>
+            <select name="related_blog_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                <option value="">None</option>
+                <?php foreach ($blogPosts as $blog): ?>
+                <option value="<?= $blog['id'] ?>" <?= ($editCourse['related_blog_id'] ?? '') == $blog['id'] ? 'selected' : '' ?>>
+                    <?= e($blog['title']) ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="text-sm text-gray-500 mt-1">When a related blog is live, a "Read More" button will appear on this training page</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

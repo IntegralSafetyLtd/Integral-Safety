@@ -69,9 +69,10 @@
             <!-- Bottom Bar -->
             <div class="border-t border-navy-700 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-gray-400 text-sm">&copy; <?= date('Y') ?> <?= e(getSetting('site_name', SITE_NAME)) ?>. All rights reserved.</p>
-                <div class="flex gap-6 text-sm text-gray-400">
+                <div class="flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400">
                     <a href="/privacy" class="hover:text-white transition-colors">Privacy Policy</a>
                     <a href="/terms" class="hover:text-white transition-colors">Terms & Conditions</a>
+                    <button type="button" onclick="openCookieSettings()" class="hover:text-white transition-colors">Cookie Settings</button>
                 </div>
             </div>
         </div>
@@ -83,5 +84,11 @@
             document.getElementById('mobileMenu').classList.toggle('hidden');
         });
     </script>
+
+    <?php
+    // Cookie consent banner
+    require_once INCLUDES_PATH . '/cookies.php';
+    outputCookieConsentBanner();
+    ?>
 </body>
 </html>

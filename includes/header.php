@@ -117,10 +117,9 @@ $seoCanonical = $canonicalUrl ?? null;
     </style>
 
     <?php outputStructuredData(); ?>
-    <?php outputHeadAnalytics(); ?>
+    <?php // Analytics are now loaded via cookie consent system in cookies.php ?>
 </head>
 <body class="bg-cream text-navy-900 antialiased">
-    <?php outputBodyAnalytics(); ?>
 
     <!-- Top Bar -->
     <div class="bg-navy-900 text-white py-2.5 text-sm">
