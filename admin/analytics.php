@@ -257,8 +257,9 @@ require_once __DIR__ . '/includes/header.php';
 
         <!-- Traffic Sources Table -->
         <div class="bg-white rounded-lg shadow">
-            <div class="p-4 border-b border-gray-200">
+            <div class="p-4 border-b border-gray-200 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-gray-800">Referrers</h2>
+                <a href="/admin/analytics-acquisition.php" class="text-sm text-orange-500 hover:text-orange-600">View All &rarr;</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
