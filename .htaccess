@@ -28,6 +28,7 @@ RewriteRule ^havs-testing/?$ /services/havs-testing/ [R=301,L]
 RewriteRule ^accreditation-support/?$ /services/accreditation-support/ [R=301,L]
 
 # Old page URLs
+RewriteRule ^wpautoterms/privacy-policy/?$ /privacy/ [R=301,L]
 RewriteRule ^contact-us/?$ /contact/ [R=301,L]
 RewriteRule ^health-and-safety-training/?$ /training/ [R=301,L]
 RewriteRule ^health-and-safety-consultancy-service/?$ /services/consultancy/ [R=301,L]
