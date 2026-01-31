@@ -83,7 +83,8 @@ try {
     $visitors = [];
     foreach ($liveVisitors as $v) {
         $visitors[] = [
-            'session_hash' => substr($v['session_hash'], 0, 8) . '...', // Truncate for privacy
+            'session_hash' => substr($v['session_hash'], 0, 8) . '...',
+            'session_hash_full' => $v['session_hash'], // Full hash for drill-down
             'page' => $v['page_path'],
             'page_title' => $v['page_title'],
             'referrer' => $v['referrer_domain'] ?: 'Direct',

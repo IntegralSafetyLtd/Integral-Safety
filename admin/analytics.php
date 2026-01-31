@@ -102,7 +102,63 @@ require_once __DIR__ . '/includes/header.php';
             </table>
         </div>
         <div class="px-4 py-2 bg-gray-50 text-xs text-gray-500 rounded-b-lg">
-            Auto-refreshes every 30 seconds
+            Auto-refreshes every 30 seconds | Click a row to see full journey
+        </div>
+    </div>
+
+    <!-- Session Drill-Down Modal -->
+    <div id="sessionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex items-center justify-between bg-navy-800 text-white rounded-t-lg">
+                <div>
+                    <h3 class="font-semibold text-lg">Visitor Journey</h3>
+                    <p class="text-sm opacity-75" id="modalSessionInfo">Loading...</p>
+                </div>
+                <button onclick="closeSessionModal()" class="text-white hover:text-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <!-- Visitor Info -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 uppercase">Device</p>
+                        <p class="font-semibold" id="modalDevice">-</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 uppercase">Browser / OS</p>
+                        <p class="font-semibold" id="modalBrowser">-</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 uppercase">Location</p>
+                        <p class="font-semibold" id="modalLocation">-</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 uppercase">Session Duration</p>
+                        <p class="font-semibold" id="modalDuration">-</p>
+                    </div>
+                </div>
+
+                <!-- Entry Source -->
+                <div class="mb-4 p-3 bg-green-50 border-l-4 border-green-500 rounded">
+                    <p class="text-xs text-green-700 uppercase font-medium">Entry Source</p>
+                    <p class="text-green-800" id="modalEntrySource">-</p>
+                </div>
+
+                <!-- Journey Timeline -->
+                <h4 class="font-semibold text-gray-700 mb-3">Page Journey (<span id="modalPageCount">0</span> pages)</h4>
+                <div class="relative" id="modalJourney">
+                    <div class="text-center text-gray-500 py-8">Loading journey...</div>
+                </div>
+
+                <!-- UTM Info (if present) -->
+                <div id="modalUtmSection" class="hidden mt-4 p-3 bg-purple-50 rounded-lg">
+                    <p class="text-xs text-purple-700 uppercase font-medium mb-2">Campaign Attribution</p>
+                    <div class="text-sm text-purple-800" id="modalUtm"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -455,7 +511,7 @@ require_once __DIR__ . '/includes/header.php';
                 }
 
                 tbody.innerHTML = data.data.visitors.map(v => `
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-orange-50 cursor-pointer transition-colors" onclick="openSessionModal('${v.session_hash_full}')">
                         <td class="px-4 py-2">
                             <div class="text-sm font-medium text-gray-900 truncate max-w-xs" title="${escapeHtml(v.page)}">${escapeHtml(v.page)}</div>
                             ${v.page_title ? `<div class="text-xs text-gray-500 truncate max-w-xs">${escapeHtml(v.page_title)}</div>` : ''}
@@ -472,7 +528,9 @@ require_once __DIR__ . '/includes/header.php';
                             ${v.country_code ? `<span class="mr-1">${getFlagEmoji(v.country_code)}</span>` : ''}
                             ${escapeHtml(v.country)}
                         </td>
-                        <td class="px-4 py-2 text-sm text-gray-600">${v.session_pages}</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-700 text-xs font-medium">${v.session_pages}</span>
+                        </td>
                         <td class="px-4 py-2 text-right text-sm text-gray-500">${escapeHtml(v.time_ago)}</td>
                     </tr>
                 `).join('');
@@ -500,6 +558,119 @@ require_once __DIR__ . '/includes/header.php';
             .split('')
             .map(char => 127397 + char.charCodeAt());
         return String.fromCodePoint(...codePoints);
+    }
+
+    // Session Modal Functions
+    window.openSessionModal = async function(sessionHash) {
+        const modal = document.getElementById('sessionModal');
+        modal.classList.remove('hidden');
+
+        // Reset content
+        document.getElementById('modalSessionInfo').textContent = 'Loading...';
+        document.getElementById('modalJourney').innerHTML = '<div class="text-center text-gray-500 py-8">Loading journey...</div>';
+
+        try {
+            const response = await fetch(`/admin/api/analytics/session.php?hash=${encodeURIComponent(sessionHash)}`);
+            const data = await response.json();
+
+            if (data.success) {
+                const session = data.data.session;
+                const visitor = data.data.visitor;
+                const journey = data.data.journey;
+                const utm = data.data.utm;
+
+                // Update session info
+                document.getElementById('modalSessionInfo').textContent =
+                    `${session.pageviews} pages · ${session.duration_formatted} · Started ${formatTime(session.first_seen)}`;
+
+                // Update visitor info cards
+                document.getElementById('modalDevice').textContent = visitor.device;
+                document.getElementById('modalBrowser').textContent = `${visitor.browser} / ${visitor.os}`;
+                document.getElementById('modalLocation').innerHTML =
+                    `${session.country_code ? getFlagEmoji(session.country_code) + ' ' : ''}${session.country_name}`;
+                document.getElementById('modalDuration').textContent = session.duration_formatted;
+
+                // Entry source
+                const entrySource = visitor.initial_referrer_type === 'direct'
+                    ? 'Direct visit (no referrer)'
+                    : `${visitor.initial_referrer} (${visitor.initial_referrer_type})`;
+                document.getElementById('modalEntrySource').textContent = entrySource;
+
+                // Page count
+                document.getElementById('modalPageCount').textContent = journey.length;
+
+                // Build journey timeline
+                const journeyHtml = journey.map((step, i) => `
+                    <div class="flex items-start gap-4 ${i < journey.length - 1 ? 'pb-4' : ''}">
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                step.is_entry ? 'bg-green-500 text-white' :
+                                step.is_exit ? 'bg-red-500 text-white' :
+                                'bg-orange-500 text-white'
+                            }">
+                                ${step.step}
+                            </div>
+                            ${i < journey.length - 1 ? '<div class="w-0.5 h-full bg-gray-300 mt-1"></div>' : ''}
+                        </div>
+                        <div class="flex-1 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium text-gray-900">${escapeHtml(step.page_path)}</span>
+                                ${step.is_entry ? '<span class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded">Entry</span>' : ''}
+                                ${step.is_exit ? '<span class="px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded">Exit</span>' : ''}
+                            </div>
+                            ${step.page_title ? `<div class="text-sm text-gray-500">${escapeHtml(step.page_title)}</div>` : ''}
+                            <div class="text-xs text-gray-400 mt-1">
+                                ${step.viewed_at_formatted}
+                                ${step.time_on_page_formatted ? ` · <span class="text-orange-600">Spent ${step.time_on_page_formatted}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('modalJourney').innerHTML = journeyHtml || '<div class="text-center text-gray-500 py-4">No pages recorded</div>';
+
+                // UTM section
+                const utmSection = document.getElementById('modalUtmSection');
+                if (utm.source || utm.medium || utm.campaign) {
+                    utmSection.classList.remove('hidden');
+                    document.getElementById('modalUtm').innerHTML = `
+                        <div class="grid grid-cols-3 gap-2 text-sm">
+                            <div><span class="text-purple-600">Source:</span> ${escapeHtml(utm.source || '-')}</div>
+                            <div><span class="text-purple-600">Medium:</span> ${escapeHtml(utm.medium || '-')}</div>
+                            <div><span class="text-purple-600">Campaign:</span> ${escapeHtml(utm.campaign || '-')}</div>
+                        </div>
+                    `;
+                } else {
+                    utmSection.classList.add('hidden');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load session:', error);
+            document.getElementById('modalJourney').innerHTML = '<div class="text-center text-red-500 py-4">Failed to load session data</div>';
+        }
+    };
+
+    window.closeSessionModal = function() {
+        document.getElementById('sessionModal').classList.add('hidden');
+    };
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSessionModal();
+        }
+    });
+
+    // Close modal on background click
+    document.getElementById('sessionModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeSessionModal();
+        }
+    });
+
+    // Format time
+    function formatTime(datetime) {
+        return new Date(datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
 
     // Load overview stats
