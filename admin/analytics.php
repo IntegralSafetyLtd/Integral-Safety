@@ -45,8 +45,11 @@ require_once __DIR__ . '/includes/header.php';
             <p class="text-gray-600">Server-side, cookie-free visitor tracking</p>
         </div>
 
-        <!-- Date Range Picker -->
+        <!-- Date Range Picker and Report Button -->
         <div class="flex items-center gap-2">
+            <a href="/admin/analytics-report.php" id="reportLink" class="bg-navy-700 text-white px-4 py-2 rounded-lg hover:bg-navy-600 text-sm">
+                Generate Report
+            </a>
             <select id="dateRange" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500">
                 <option value="7">Last 7 days</option>
                 <option value="14">Last 14 days</option>
@@ -416,6 +419,17 @@ require_once __DIR__ . '/includes/header.php';
         loadReferrers();
         loadDevices();
         loadLocations();
+        updateReportLink();
+    }
+
+    // Update report link with current date range
+    function updateReportLink() {
+        const link = document.getElementById('reportLink');
+        if (customStart && customEnd) {
+            link.href = `/admin/analytics-report.php?start=${customStart}&end=${customEnd}`;
+        } else {
+            link.href = `/admin/analytics-report.php?preset=${currentDays}`;
+        }
     }
 
     // Load live visitors
