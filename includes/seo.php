@@ -167,28 +167,93 @@ function outputStructuredData() {
     $siteName = getSetting('site_name', SITE_NAME);
     $contactEmail = getSetting('contact_email', SITE_EMAIL);
     $contactPhone = getSetting('contact_phone', '');
+    $legalName = getSetting('seo_schema_legal_name', $siteName);
 
-    // Build the schema object
-    $schema = [
+    // Get logo URL
+    $logo = getSetting('seo_schema_logo_url', '/assets/images/logo.png');
+    if (strpos($logo, 'http') !== 0) {
+        $logo = SITE_URL . $logo;
+    }
+
+    // Get social profiles
+    $sameAs = [];
+    if ($fb = getSetting('facebook_url')) {
+        $sameAs[] = $fb;
+    }
+    if ($li = getSetting('linkedin_url')) {
+        $sameAs[] = $li;
+    }
+    if ($tw = getSetting('twitter_url')) {
+        $sameAs[] = $tw;
+    }
+
+    // Build the schema using @graph for multiple entities
+    $graph = [
         '@context' => 'https://schema.org',
+        '@graph' => []
+    ];
+
+    // 1. Organization schema (for sitelinks and knowledge panel)
+    $organization = [
+        '@type' => 'Organization',
+        '@id' => SITE_URL . '/#organization',
+        'name' => $siteName,
+        'legalName' => $legalName,
+        'url' => SITE_URL,
+        'logo' => [
+            '@type' => 'ImageObject',
+            '@id' => SITE_URL . '/#logo',
+            'url' => $logo,
+            'contentUrl' => $logo,
+            'caption' => $siteName
+        ],
+        'image' => ['@id' => SITE_URL . '/#logo'],
+        'description' => getSetting('site_tagline', 'Health and Safety Consultants'),
+    ];
+
+    if ($contactPhone) {
+        $organization['telephone'] = $contactPhone;
+    }
+    if ($contactEmail) {
+        $organization['email'] = $contactEmail;
+    }
+    if (!empty($sameAs)) {
+        $organization['sameAs'] = $sameAs;
+    }
+
+    $graph['@graph'][] = $organization;
+
+    // 2. WebSite schema (helps with sitelinks search box)
+    $website = [
+        '@type' => 'WebSite',
+        '@id' => SITE_URL . '/#website',
+        'url' => SITE_URL,
+        'name' => $siteName,
+        'publisher' => ['@id' => SITE_URL . '/#organization'],
+        'potentialAction' => [
+            '@type' => 'SearchAction',
+            'target' => SITE_URL . '/blog?search={search_term_string}',
+            'query-input' => 'required name=search_term_string'
+        ]
+    ];
+
+    $graph['@graph'][] = $website;
+
+    // 3. LocalBusiness schema (for local SEO)
+    $schema = [
         '@type' => getSetting('seo_schema_business_type', 'LocalBusiness'),
+        '@id' => SITE_URL . '/#localbusiness',
         'name' => $siteName,
         'url' => SITE_URL,
+        'parentOrganization' => ['@id' => SITE_URL . '/#organization'],
     ];
 
     // Legal name
-    if ($legalName = getSetting('seo_schema_legal_name')) {
-        $schema['legalName'] = $legalName;
-    }
+    $schema['legalName'] = $legalName;
 
     // Logo
-    if ($logo = getSetting('seo_schema_logo_url')) {
-        if (strpos($logo, 'http') !== 0) {
-            $logo = SITE_URL . $logo;
-        }
-        $schema['logo'] = $logo;
-        $schema['image'] = $logo;
-    }
+    $schema['logo'] = $logo;
+    $schema['image'] = $logo;
 
     // Description
     $schema['description'] = getSetting('site_tagline', 'Health and safety consultants providing fire risk assessments, IOSH training, and consultancy services.');
@@ -269,17 +334,7 @@ function outputStructuredData() {
         $schema['priceRange'] = $priceRange;
     }
 
-    // Social profiles
-    $sameAs = [];
-    if ($fb = getSetting('facebook_url')) {
-        $sameAs[] = $fb;
-    }
-    if ($li = getSetting('linkedin_url')) {
-        $sameAs[] = $li;
-    }
-    if ($tw = getSetting('twitter_url')) {
-        $sameAs[] = $tw;
-    }
+    // Social profiles already added to Organization above
     if (!empty($sameAs)) {
         $schema['sameAs'] = $sameAs;
     }
@@ -296,9 +351,12 @@ function outputStructuredData() {
         ];
     }
 
+    // Add LocalBusiness to graph
+    $graph['@graph'][] = $schema;
+
     echo "\n    <!-- Structured Data -->\n";
     echo '    <script type="application/ld+json">' . "\n";
-    echo '    ' . json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    echo '    ' . json_encode($graph, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     echo "\n    </script>\n";
 }
 

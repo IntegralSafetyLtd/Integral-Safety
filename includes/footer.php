@@ -10,13 +10,13 @@
                     <p class="text-gray-400 mb-4">Professional health and safety consultancy services for businesses across Leicestershire and the Midlands.</p>
                     <div class="flex gap-4">
                         <?php if ($fb = getSetting('facebook_url')): ?>
-                        <a href="<?= e($fb) ?>" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.77,7.46H14.5v-1.9c0-.9.6-1.1,1-1.1h3V.5h-4.33C10.24.5,9.5,3.44,9.5,5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4Z"/></svg>
+                        <a href="<?= e($fb) ?>" target="_blank" rel="noopener" class="text-gray-400 hover:text-white transition-colors" aria-label="Follow us on Facebook">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.77,7.46H14.5v-1.9c0-.9.6-1.1,1-1.1h3V.5h-4.33C10.24.5,9.5,3.44,9.5,5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4Z"/></svg>
                         </a>
                         <?php endif; ?>
                         <?php if ($li = getSetting('linkedin_url')): ?>
-                        <a href="<?= e($li) ?>" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447,20.452H16.893V14.883c0-1.328-.027-3.037-1.852-3.037-1.853,0-2.136,1.445-2.136,2.939v5.667H9.351V9h3.414v1.561h.046a3.745,3.745,0,0,1,3.37-1.85c3.6,0,4.267,2.37,4.267,5.455v6.286ZM5.337,7.433A2.064,2.064,0,1,1,7.4,5.368,2.062,2.062,0,0,1,5.337,7.433ZM7.119,20.452H3.555V9H7.119ZM22.225,0H1.771A1.75,1.75,0,0,0,0,1.729V22.271A1.749,1.749,0,0,0,1.771,24H22.222A1.756,1.756,0,0,0,24,22.271V1.729A1.756,1.756,0,0,0,22.222,0Z"/></svg>
+                        <a href="<?= e($li) ?>" target="_blank" rel="noopener" class="text-gray-400 hover:text-white transition-colors" aria-label="Follow us on LinkedIn">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447,20.452H16.893V14.883c0-1.328-.027-3.037-1.852-3.037-1.853,0-2.136,1.445-2.136,2.939v5.667H9.351V9h3.414v1.561h.046a3.745,3.745,0,0,1,3.37-1.85c3.6,0,4.267,2.37,4.267,5.455v6.286ZM5.337,7.433A2.064,2.064,0,1,1,7.4,5.368,2.062,2.062,0,0,1,5.337,7.433ZM7.119,20.452H3.555V9H7.119ZM22.225,0H1.771A1.75,1.75,0,0,0,0,1.729V22.271A1.749,1.749,0,0,0,1.771,24H22.222A1.756,1.756,0,0,0,24,22.271V1.729A1.756,1.756,0,0,0,22.222,0Z"/></svg>
                         </a>
                         <?php endif; ?>
                     </div>
@@ -63,6 +63,46 @@
                             </a>
                         </li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- Service Areas -->
+            <div class="border-t border-navy-700 pt-8 mb-8">
+                <h3 class="font-heading font-semibold text-lg mb-4 text-center">Service Areas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                    <!-- Health & Safety Consultants -->
+                    <div>
+                        <h4 class="text-orange-400 font-medium mb-2">Health & Safety Consultants</h4>
+                        <ul class="space-y-1">
+                            <li><a href="/health-and-safety-consultants-leicester" class="text-gray-400 hover:text-white transition-colors">Leicester</a></li>
+                            <li><a href="/health-and-safety-consultants-nottingham" class="text-gray-400 hover:text-white transition-colors">Nottingham</a></li>
+                            <li><a href="/health-and-safety-consultants-derby" class="text-gray-400 hover:text-white transition-colors">Derby</a></li>
+                            <li><a href="/health-and-safety-consultants-loughborough" class="text-gray-400 hover:text-white transition-colors">Loughborough</a></li>
+                            <li><a href="/health-and-safety-east-midlands" class="text-gray-400 hover:text-white transition-colors">East Midlands</a></li>
+                        </ul>
+                    </div>
+                    <!-- Fire Risk Assessments -->
+                    <div>
+                        <h4 class="text-orange-400 font-medium mb-2">Fire Risk Assessments</h4>
+                        <ul class="space-y-1">
+                            <li><a href="/fire-risk-assessments-leicester" class="text-gray-400 hover:text-white transition-colors">Leicester</a></li>
+                            <li><a href="/fire-risk-assessments-nottingham" class="text-gray-400 hover:text-white transition-colors">Nottingham</a></li>
+                            <li><a href="/fire-risk-assessments-derby" class="text-gray-400 hover:text-white transition-colors">Derby</a></li>
+                            <li><a href="/fire-risk-assessments-loughborough" class="text-gray-400 hover:text-white transition-colors">Loughborough</a></li>
+                            <li><a href="/fire-risk-assessments-east-midlands" class="text-gray-400 hover:text-white transition-colors">East Midlands</a></li>
+                        </ul>
+                    </div>
+                    <!-- Health & Safety Training -->
+                    <div>
+                        <h4 class="text-orange-400 font-medium mb-2">Health & Safety Training</h4>
+                        <ul class="space-y-1">
+                            <li><a href="/health-and-safety-training-leicester" class="text-gray-400 hover:text-white transition-colors">Leicester</a></li>
+                            <li><a href="/health-and-safety-training-nottingham" class="text-gray-400 hover:text-white transition-colors">Nottingham</a></li>
+                            <li><a href="/health-and-safety-training-derby" class="text-gray-400 hover:text-white transition-colors">Derby</a></li>
+                            <li><a href="/health-and-safety-training-loughborough" class="text-gray-400 hover:text-white transition-colors">Loughborough</a></li>
+                            <li><a href="/health-and-safety-training-east-midlands" class="text-gray-400 hover:text-white transition-colors">East Midlands</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
