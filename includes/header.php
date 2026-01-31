@@ -3,6 +3,10 @@
  * Public Header Template
  */
 require_once __DIR__ . '/seo.php';
+require_once __DIR__ . '/analytics.php';
+
+// Track page view (server-side, cookie-free)
+trackPageview($pageTitle ?? null);
 
 $siteName = getSetting('site_name', SITE_NAME);
 $siteTagline = getSetting('site_tagline', 'Health & Safety Consultants');
@@ -43,78 +47,13 @@ $seoCanonical = $canonicalUrl ?? null;
     <!-- Favicon -->
     <link rel="icon" href="<?= e($siteFavicon) ?>">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts (self-hosted) -->
+    <link rel="preload" href="/assets/fonts/poppins-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/assets/css/fonts.css">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        navy: {
-                            100: '#e8eef4',
-                            600: '#2a4a6e',
-                            700: '#1e3a5f',
-                            800: '#132337',
-                            900: '#0c1929'
-                        },
-                        orange: {
-                            100: '#fff0e6',
-                            500: '#e85d04',
-                            600: '#dc5503'
-                        },
-                        cream: {
-                            DEFAULT: '#faf9f7',
-                            dark: '#f5f3ef'
-                        },
-                        green: {
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a'
-                        }
-                    },
-                    fontFamily: {
-                        heading: ['Poppins', 'sans-serif'],
-                        body: ['Plus Jakarta Sans', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
-
-        /* Prose-like content styling */
-        .prose { color: #374151; line-height: 1.75; }
-        .prose h2 { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 600; color: #0c1929; margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e85d04; }
-        .prose h2:first-child { margin-top: 0; }
-        .prose h3 { font-family: 'Poppins', sans-serif; font-size: 1.125rem; font-weight: 600; color: #132337; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-        .prose p { margin-bottom: 1.25rem; }
-        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; }
-        .prose ul li { margin-bottom: 0.5rem; position: relative; }
-        .prose ul li::marker { color: #e85d04; }
-        .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1.5rem; }
-        .prose ol li { margin-bottom: 0.5rem; }
-        .prose strong { font-weight: 600; color: #0c1929; }
-        .prose a { color: #e85d04; text-decoration: underline; }
-        .prose a:hover { color: #dc5503; }
-
-        /* Blob animations */
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 7s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-    </style>
+    <!-- Tailwind CSS (production build) -->
+    <link rel="stylesheet" href="/assets/css/styles.css">
 
     <?php outputStructuredData(); ?>
     <?php // Analytics are now loaded via cookie consent system in cookies.php ?>
@@ -149,7 +88,12 @@ $seoCanonical = $canonicalUrl ?? null;
         <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
             <!-- Logo -->
             <a href="/" class="flex items-center">
-                <img src="<?= e($siteLogo) ?>" alt="<?= e($siteName) ?>" class="h-16 w-auto">
+                <img src="/assets/images/logo-1x.png"
+                     srcset="/assets/images/logo-1x.png 1x, /assets/images/logo.png 2x"
+                     alt="<?= e($siteName) ?>"
+                     class="h-16 w-auto"
+                     width="224"
+                     height="112">
             </a>
 
             <!-- Desktop Navigation -->
@@ -165,8 +109,8 @@ $seoCanonical = $canonicalUrl ?? null;
             </nav>
 
             <!-- Mobile Menu Button -->
-            <button id="mobileMenuBtn" class="lg:hidden p-2 text-navy-800">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="mobileMenuBtn" class="lg:hidden p-2 text-navy-800" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>

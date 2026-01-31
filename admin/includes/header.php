@@ -127,6 +127,11 @@ $isAccountPage = in_array($currentPage, $accountPages);
                             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"><?= $unread ?></span>
                             <?php endif; ?>
                         </a>
+
+                        <!-- Analytics -->
+                        <a href="/admin/analytics.php" class="px-3 py-2 rounded <?= $currentPage === 'analytics' ? 'bg-navy-700' : 'hover:bg-navy-700' ?>">
+                            Analytics
+                        </a>
                     </div>
                 </div>
 
@@ -196,6 +201,7 @@ $isAccountPage = in_array($currentPage, $accountPages);
             <a href="/admin/blog.php" class="px-2 py-1 text-sm rounded hover:bg-navy-700">Blog</a>
             <a href="/admin/gallery.php" class="px-2 py-1 text-sm rounded hover:bg-navy-700">Gallery</a>
             <a href="/admin/seo.php" class="px-2 py-1 text-sm rounded hover:bg-navy-700">SEO</a>
+            <a href="/admin/analytics.php" class="px-2 py-1 text-sm rounded hover:bg-navy-700">Analytics</a>
             <a href="/admin/settings.php" class="px-2 py-1 text-sm rounded hover:bg-navy-700">Settings</a>
         </div>
     </div>
