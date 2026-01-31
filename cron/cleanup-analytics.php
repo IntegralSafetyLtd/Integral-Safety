@@ -26,41 +26,50 @@ echo "Retention period: {$retentionDays} days\n";
 echo "Cutoff date: {$cutoffDate}\n";
 
 try {
-    // Delete old pageviews
-    $result = dbExecute(
-        "DELETE FROM analytics_pageviews WHERE date_only < ?",
+    // Count and delete old pageviews
+    $countPageviews = dbFetchOne(
+        "SELECT COUNT(*) as cnt FROM analytics_pageviews WHERE date_only < ?",
         [$cutoffDate]
-    );
-    $deletedPageviews = db()->rowCount();
-    echo "Deleted pageviews: {$deletedPageviews}\n";
+    )['cnt'] ?? 0;
 
-    // Delete old sessions
-    $result = dbExecute(
-        "DELETE FROM analytics_sessions WHERE date_only < ?",
+    if ($countPageviews > 0) {
+        dbExecute("DELETE FROM analytics_pageviews WHERE date_only < ?", [$cutoffDate]);
+    }
+    echo "Deleted pageviews: {$countPageviews}\n";
+
+    // Count and delete old sessions
+    $countSessions = dbFetchOne(
+        "SELECT COUNT(*) as cnt FROM analytics_sessions WHERE date_only < ?",
         [$cutoffDate]
-    );
-    $deletedSessions = db()->rowCount();
-    echo "Deleted sessions: {$deletedSessions}\n";
+    )['cnt'] ?? 0;
+
+    if ($countSessions > 0) {
+        dbExecute("DELETE FROM analytics_sessions WHERE date_only < ?", [$cutoffDate]);
+    }
+    echo "Deleted sessions: {$countSessions}\n";
 
     // Keep daily stats longer (useful for year-over-year comparisons)
     // Only delete stats older than 2 years
     $statsRetentionDays = max($retentionDays * 2, 730);
     $statsCutoffDate = date('Y-m-d', strtotime("-{$statsRetentionDays} days"));
 
-    $result = dbExecute(
-        "DELETE FROM analytics_daily_stats WHERE stat_date < ?",
+    $countStats = dbFetchOne(
+        "SELECT COUNT(*) as cnt FROM analytics_daily_stats WHERE stat_date < ?",
         [$statsCutoffDate]
-    );
-    $deletedStats = db()->rowCount();
-    echo "Deleted daily stats: {$deletedStats}\n";
+    )['cnt'] ?? 0;
+
+    if ($countStats > 0) {
+        dbExecute("DELETE FROM analytics_daily_stats WHERE stat_date < ?", [$statsCutoffDate]);
+    }
+    echo "Deleted daily stats: {$countStats}\n";
 
     // Optimise tables after deletion (only if significant rows deleted)
-    if ($deletedPageviews > 1000) {
+    if ($countPageviews > 1000) {
         echo "Optimising analytics_pageviews table...\n";
         db()->exec("OPTIMIZE TABLE analytics_pageviews");
     }
 
-    if ($deletedSessions > 1000) {
+    if ($countSessions > 1000) {
         echo "Optimising analytics_sessions table...\n";
         db()->exec("OPTIMIZE TABLE analytics_sessions");
     }
