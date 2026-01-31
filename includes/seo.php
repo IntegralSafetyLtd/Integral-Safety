@@ -217,6 +217,33 @@ function outputStructuredData() {
     if ($contactEmail) {
         $organization['email'] = $contactEmail;
     }
+
+    // Address for Organization
+    $streetAddress = getSetting('seo_schema_street_address', getSetting('address_line1', ''));
+    $locality = getSetting('seo_schema_address_locality', getSetting('city', ''));
+    $region = getSetting('seo_schema_address_region', '');
+    $postalCode = getSetting('seo_schema_postal_code', getSetting('postcode', ''));
+    $country = getSetting('seo_schema_country', 'GB');
+
+    if ($streetAddress || $locality || $postalCode) {
+        $organization['address'] = [
+            '@type' => 'PostalAddress',
+            'addressCountry' => $country,
+        ];
+        if ($streetAddress) {
+            $organization['address']['streetAddress'] = $streetAddress;
+        }
+        if ($locality) {
+            $organization['address']['addressLocality'] = $locality;
+        }
+        if ($region) {
+            $organization['address']['addressRegion'] = $region;
+        }
+        if ($postalCode) {
+            $organization['address']['postalCode'] = $postalCode;
+        }
+    }
+
     if (!empty($sameAs)) {
         $organization['sameAs'] = $sameAs;
     }
