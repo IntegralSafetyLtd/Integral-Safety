@@ -15,7 +15,8 @@ function trackPageview($pageTitle = null) {
     }
 
     // Exclude logged-in admins if setting enabled
-    if (getSetting('analytics_exclude_admins', '1') === '1' && isLoggedIn()) {
+    $loggedIn = function_exists('isLoggedIn') ? isLoggedIn() : !empty($_SESSION['user_id']);
+    if (getSetting('analytics_exclude_admins', '1') === '1' && $loggedIn) {
         return false;
     }
 
