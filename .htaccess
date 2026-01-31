@@ -4,6 +4,40 @@
 # Enable Rewrite Engine
 RewriteEngine On
 
+# =============================================
+# 301 Redirects - Old URLs to New Structure
+# =============================================
+
+# Old training course URLs (root level → /training/)
+RewriteRule ^coshh-awareness/?$ /training/coshh-awareness/ [R=301,L]
+RewriteRule ^iosh-managing-safely/?$ /training/iosh-managing-safely/ [R=301,L]
+RewriteRule ^fire-awareness/?$ /training/fire-awareness/ [R=301,L]
+RewriteRule ^manual-handling/?$ /training/manual-handling/ [R=301,L]
+RewriteRule ^sharps-awareness/?$ /training/sharps-awareness/ [R=301,L]
+RewriteRule ^accident-investigation/?$ /training/accident-investigation/ [R=301,L]
+
+# Old service URLs (root level → /services/)
+RewriteRule ^fire-risk-assessments/?$ /services/fire-risk-assessments/ [R=301,L]
+RewriteRule ^face-fit-testing/?$ /services/face-fit-testing/ [R=301,L]
+RewriteRule ^drone-surveys/?$ /services/work-at-height-surveys/ [R=301,L]
+RewriteRule ^work-at-height-surveys/?$ /services/work-at-height-surveys/ [R=301,L]
+RewriteRule ^consultancy/?$ /services/consultancy/ [R=301,L]
+RewriteRule ^auditing/?$ /services/auditing/ [R=301,L]
+RewriteRule ^competent-person/?$ /services/competent-person/ [R=301,L]
+RewriteRule ^havs-testing/?$ /services/havs-testing/ [R=301,L]
+RewriteRule ^accreditation-support/?$ /services/accreditation-support/ [R=301,L]
+
+# Old page URLs
+RewriteRule ^contact-us/?$ /contact/ [R=301,L]
+RewriteRule ^health-and-safety-training/?$ /training/ [R=301,L]
+RewriteRule ^health-and-safety-consultancy-service/?$ /services/consultancy/ [R=301,L]
+RewriteRule ^health-safety-competent-person-services/?$ /services/competent-person/ [R=301,L]
+RewriteRule ^leicestershire-health-and-safety-consultant/?$ / [R=301,L]
+RewriteRule ^health-safety-services-in-melton-mowbray/?$ / [R=301,L]
+RewriteRule ^housing-association-and-almshouses/?$ / [R=301,L]
+
+# =============================================
+
 # Force HTTPS
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -79,16 +113,20 @@ RewriteRule ^(health-and-safety-training-east-midlands)/?$ location.php?slug=$1 
 # Handle 404 errors
 ErrorDocument 404 /404.php
 
-# Caching for static assets
+# Caching for static assets (1 year for versioned files)
 <IfModule mod_expires.c>
     ExpiresActive On
-    ExpiresByType image/jpg "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/gif "access plus 1 month"
-    ExpiresByType image/png "access plus 1 month"
-    ExpiresByType image/webp "access plus 1 month"
-    ExpiresByType text/css "access plus 1 week"
-    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/avif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
     ExpiresByType image/x-icon "access plus 1 year"
 </IfModule>
 
