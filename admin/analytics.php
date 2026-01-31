@@ -67,6 +67,42 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 
+    <!-- Live Visitors Panel -->
+    <div class="bg-white rounded-lg shadow mb-6">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <h2 class="text-lg font-semibold text-gray-800">Live Visitors</h2>
+                <span class="text-3xl font-bold text-green-600" id="liveCount">-</span>
+                <span class="text-sm text-gray-500">active in last 5 minutes</span>
+            </div>
+            <div class="text-xs text-gray-400" id="liveUpdated">-</div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Page</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Referrer</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Country</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pages</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Time</th>
+                    </tr>
+                </thead>
+                <tbody id="liveVisitorsTable" class="divide-y divide-gray-200">
+                    <tr><td colspan="6" class="px-4 py-3 text-center text-gray-500">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-4 py-2 bg-gray-50 text-xs text-gray-500 rounded-b-lg">
+            Auto-refreshes every 30 seconds
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow p-6">
@@ -311,10 +347,16 @@ require_once __DIR__ . '/includes/header.php';
         chartColors: ['#e85d04', '#1e3a5f', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899']
     };
 
+    // Live refresh interval
+    let liveRefreshInterval = null;
+
     // Initialise on page load
     document.addEventListener('DOMContentLoaded', function() {
         initDatePicker();
         loadAllData();
+        loadLiveVisitors();
+        // Auto-refresh live visitors every 30 seconds
+        liveRefreshInterval = setInterval(loadLiveVisitors, 30000);
     });
 
     // Date picker functionality
@@ -374,6 +416,76 @@ require_once __DIR__ . '/includes/header.php';
         loadReferrers();
         loadDevices();
         loadLocations();
+    }
+
+    // Load live visitors
+    async function loadLiveVisitors() {
+        try {
+            const response = await fetch('/admin/api/analytics/live.php?minutes=5');
+            const data = await response.json();
+
+            if (data.success) {
+                // Update count
+                document.getElementById('liveCount').textContent = data.data.active_count;
+
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('liveUpdated').textContent = 'Updated ' + now.toLocaleTimeString();
+
+                // Update table
+                const tbody = document.getElementById('liveVisitorsTable');
+
+                if (data.data.visitors.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No active visitors right now</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.data.visitors.map(v => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2">
+                            <div class="text-sm font-medium text-gray-900 truncate max-w-xs" title="${escapeHtml(v.page)}">${escapeHtml(v.page)}</div>
+                            ${v.page_title ? `<div class="text-xs text-gray-500 truncate max-w-xs">${escapeHtml(v.page_title)}</div>` : ''}
+                        </td>
+                        <td class="px-4 py-2">
+                            <span class="text-sm text-gray-600">${escapeHtml(v.referrer)}</span>
+                            <span class="ml-1 px-1.5 py-0.5 text-xs rounded ${getTypeColor(v.referrer_type)}">${v.referrer_type}</span>
+                        </td>
+                        <td class="px-4 py-2 text-sm text-gray-600">
+                            ${getDeviceIcon(v.device)}
+                            ${escapeHtml(v.device)}
+                        </td>
+                        <td class="px-4 py-2 text-sm text-gray-600">
+                            ${v.country_code ? `<span class="mr-1">${getFlagEmoji(v.country_code)}</span>` : ''}
+                            ${escapeHtml(v.country)}
+                        </td>
+                        <td class="px-4 py-2 text-sm text-gray-600">${v.session_pages}</td>
+                        <td class="px-4 py-2 text-right text-sm text-gray-500">${escapeHtml(v.time_ago)}</td>
+                    </tr>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Failed to load live visitors:', error);
+        }
+    }
+
+    // Get device icon
+    function getDeviceIcon(device) {
+        const icons = {
+            'Desktop': '<svg class="inline w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>',
+            'Mobile': '<svg class="inline w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>',
+            'Tablet': '<svg class="inline w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>'
+        };
+        return icons[device] || '';
+    }
+
+    // Get flag emoji from country code
+    function getFlagEmoji(countryCode) {
+        if (!countryCode || countryCode.length !== 2) return '';
+        const codePoints = countryCode
+            .toUpperCase()
+            .split('')
+            .map(char => 127397 + char.charCodeAt());
+        return String.fromCodePoint(...codePoints);
     }
 
     // Load overview stats
