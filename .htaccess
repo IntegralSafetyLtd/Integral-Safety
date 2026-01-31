@@ -16,6 +16,7 @@ RewriteRule ^manual-handling/?$ /training/manual-handling/ [R=301,L]
 RewriteRule ^sharps-awareness/?$ /training/sharps-awareness/ [R=301,L]
 RewriteRule ^accident-investigation/?$ /training/accident-investigation/ [R=301,L]
 RewriteRule ^advanced-accident-investigation/?$ /training/accident-investigation/ [R=301,L]
+RewriteRule ^accident-investigation-and-riddor/?$ /training/accident-investigation/ [R=301,L]
 
 # Old service URLs (root level → /services/)
 RewriteRule ^fire-risk-assessments/?$ /services/fire-risk-assessments/ [R=301,L]
