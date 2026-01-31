@@ -323,13 +323,6 @@ function updateSession($sessionHash, $pagePath, $deviceType, $countryCode, $refe
 }
 
 /**
- * Check if user is logged in (simple check for analytics exclusion)
- */
-function isLoggedIn() {
-    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
-}
-
-/**
  * Get analytics summary for a date range
  */
 function getAnalyticsSummary($startDate, $endDate) {
