@@ -29,12 +29,38 @@ function trackPageview($pageTitle = null) {
         return false;
     }
 
-    // Generate session hash (cookie-free identification)
-    $sessionHash = generateSessionHash();
-
     // Get page info
     $pagePath = $_SERVER['REQUEST_URI'] ?? '/';
     $pagePath = strtok($pagePath, '?'); // Remove query string for cleaner paths
+
+    // Exclude automated/probe paths (not real page visits)
+    $excludedPaths = [
+        '/autodiscover',
+        '/.well-known',
+        '/wp-admin',
+        '/wp-login',
+        '/wp-content',
+        '/xmlrpc.php',
+        '/wp-includes',
+        '/phpmyadmin',
+        '/admin/api/',  // Our own API calls
+        '/cgi-bin',
+        '/cpanel',
+        '/webmail',
+        '/.env',
+        '/config',
+        '/vendor',
+        '/node_modules',
+    ];
+
+    $pathLower = strtolower($pagePath);
+    foreach ($excludedPaths as $excluded) {
+        if (strpos($pathLower, $excluded) === 0) {
+            return false;
+        }
+    }
+
+    // Generate session hash (cookie-free identification)
 
     // Get referrer info
     $referrerInfo = parseReferrer();
@@ -132,12 +158,26 @@ function anonymiseIp($ip) {
 function detectDevice($userAgent) {
     $ua = strtolower($userAgent);
 
-    // Detect bots first
+    // Detect bots and automated clients
     $botPatterns = [
+        // Search engine bots
         'bot', 'crawler', 'spider', 'slurp', 'googlebot', 'bingbot', 'yandex',
-        'baidu', 'duckduck', 'facebookexternalhit', 'linkedinbot', 'twitterbot',
-        'applebot', 'semrush', 'ahrefs', 'mj12bot', 'dotbot', 'petalbot',
-        'bytespider', 'gptbot', 'claudebot', 'anthropic'
+        'baidu', 'duckduck', 'applebot',
+        // Social media bots
+        'facebookexternalhit', 'linkedinbot', 'twitterbot', 'whatsapp', 'telegrambot',
+        // SEO tools
+        'semrush', 'ahrefs', 'mj12bot', 'dotbot', 'petalbot', 'screaming frog',
+        // AI bots
+        'bytespider', 'gptbot', 'claudebot', 'anthropic', 'chatgpt',
+        // Automated clients (not real browsers)
+        'microsoft office', 'ms office', 'outlook', 'thunderbird',
+        'wget', 'curl', 'python', 'java/', 'apache-httpclient', 'okhttp',
+        'postman', 'insomnia', 'axios', 'node-fetch', 'go-http-client',
+        // Monitoring & security scanners
+        'pingdom', 'uptimerobot', 'statuscake', 'site24x7', 'newrelic',
+        'nessus', 'nikto', 'nmap', 'masscan', 'zgrab',
+        // Other automated
+        'headless', 'phantom', 'selenium', 'puppeteer', 'playwright'
     ];
 
     foreach ($botPatterns as $pattern) {
