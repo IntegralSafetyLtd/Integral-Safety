@@ -162,9 +162,29 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 
+    <!-- Stat Card Drill-Down Modal -->
+    <div id="drilldownModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex items-center justify-between bg-navy-800 text-white rounded-t-lg">
+                <div>
+                    <h3 class="font-semibold text-lg" id="drilldownTitle">Loading...</h3>
+                    <p class="text-sm opacity-75" id="drilldownSubtitle"></p>
+                </div>
+                <button onclick="closeDrilldownModal()" class="text-white hover:text-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto max-h-[calc(90vh-80px)]" id="drilldownContent">
+                <div class="text-center text-gray-500 py-8">Loading data...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-orange-500 transition-all" onclick="openDrilldownModal('visitors')">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 uppercase tracking-wide">Unique Visitors</p>
@@ -174,9 +194,10 @@ require_once __DIR__ . '/includes/header.php';
                     <span id="statVisitorsChange" class="text-sm font-medium"></span>
                 </div>
             </div>
+            <p class="text-xs text-orange-500 mt-2">Click to view details →</p>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-orange-500 transition-all" onclick="openDrilldownModal('pageviews')">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 uppercase tracking-wide">Page Views</p>
@@ -186,9 +207,10 @@ require_once __DIR__ . '/includes/header.php';
                     <span id="statPageviewsChange" class="text-sm font-medium"></span>
                 </div>
             </div>
+            <p class="text-xs text-orange-500 mt-2">Click to view details →</p>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-orange-500 transition-all" onclick="openDrilldownModal('bounce')">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 uppercase tracking-wide">Bounce Rate</p>
@@ -198,9 +220,10 @@ require_once __DIR__ . '/includes/header.php';
                     <span id="statBounceRateChange" class="text-sm font-medium"></span>
                 </div>
             </div>
+            <p class="text-xs text-orange-500 mt-2">Click to view details →</p>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-orange-500 transition-all" onclick="openDrilldownModal('duration')">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 uppercase tracking-wide">Avg Session</p>
@@ -210,6 +233,7 @@ require_once __DIR__ . '/includes/header.php';
                     <span id="statDurationChange" class="text-sm font-medium"></span>
                 </div>
             </div>
+            <p class="text-xs text-orange-500 mt-2">Click to view details →</p>
         </div>
     </div>
 
@@ -659,6 +683,7 @@ require_once __DIR__ . '/includes/header.php';
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeSessionModal();
+            closeDrilldownModal();
         }
     });
 
@@ -668,6 +693,346 @@ require_once __DIR__ . '/includes/header.php';
             closeSessionModal();
         }
     });
+
+    // Drilldown Modal Functions
+    window.openDrilldownModal = async function(metric) {
+        const modal = document.getElementById('drilldownModal');
+        modal.classList.remove('hidden');
+
+        // Reset content
+        document.getElementById('drilldownTitle').textContent = 'Loading...';
+        document.getElementById('drilldownSubtitle').textContent = '';
+        document.getElementById('drilldownContent').innerHTML = '<div class="text-center text-gray-500 py-8">Loading data...</div>';
+
+        try {
+            const response = await fetch(buildApiUrl(`drilldown.php`) + `&metric=${metric}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const data = result.data;
+                document.getElementById('drilldownTitle').textContent = data.title;
+                document.getElementById('drilldownSubtitle').textContent = `${result.period.start} to ${result.period.end}`;
+
+                let content = '';
+
+                switch (metric) {
+                    case 'visitors':
+                        content = renderVisitorsDrilldown(data);
+                        break;
+                    case 'pageviews':
+                        content = renderPageviewsDrilldown(data);
+                        break;
+                    case 'bounce':
+                        content = renderBounceDrilldown(data);
+                        break;
+                    case 'duration':
+                        content = renderDurationDrilldown(data);
+                        break;
+                }
+
+                document.getElementById('drilldownContent').innerHTML = content;
+            } else {
+                document.getElementById('drilldownContent').innerHTML = '<div class="text-center text-red-500 py-8">Failed to load data</div>';
+            }
+        } catch (error) {
+            console.error('Failed to load drilldown data:', error);
+            document.getElementById('drilldownContent').innerHTML = '<div class="text-center text-red-500 py-8">Failed to load data</div>';
+        }
+    };
+
+    window.closeDrilldownModal = function() {
+        document.getElementById('drilldownModal').classList.add('hidden');
+    };
+
+    // Close drilldown modal on background click
+    document.getElementById('drilldownModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDrilldownModal();
+        }
+    });
+
+    // Render visitors drilldown
+    function renderVisitorsDrilldown(data) {
+        if (!data.items || data.items.length === 0) {
+            return '<div class="text-center text-gray-500 py-8">No visitors recorded</div>';
+        }
+
+        return `
+            <div class="mb-4 p-3 bg-orange-50 rounded-lg">
+                <span class="text-2xl font-bold text-orange-600">${formatNumber(data.total)}</span>
+                <span class="text-gray-600 ml-2">total visitors in period</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Landing Page</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Country</th>
+                            <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Pages</th>
+                            <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        ${data.items.map(v => `
+                            <tr class="hover:bg-orange-50 cursor-pointer" onclick="openSessionModal('${v.session_hash}')">
+                                <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(v.time)}</td>
+                                <td class="px-3 py-2 text-sm text-gray-900 truncate max-w-xs" title="${escapeHtml(v.landing_page)}">${escapeHtml(v.landing_page)}</td>
+                                <td class="px-3 py-2 text-sm">
+                                    <span class="px-2 py-0.5 text-xs rounded ${getTypeColor(v.referrer_type)}">${v.referrer_type}</span>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(v.device)}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">
+                                    ${v.country_code ? getFlagEmoji(v.country_code) + ' ' : ''}${escapeHtml(v.country)}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-right text-gray-600">${v.pageviews}</td>
+                                <td class="px-3 py-2 text-sm text-right text-gray-600">${escapeHtml(v.duration)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-gray-400 mt-3">Showing most recent 50 visitors. Click a row to view full journey.</p>
+        `;
+    }
+
+    // Render pageviews drilldown
+    function renderPageviewsDrilldown(data) {
+        if (!data.items || data.items.length === 0) {
+            return '<div class="text-center text-gray-500 py-8">No pageviews recorded</div>';
+        }
+
+        return `
+            <div class="mb-4 p-3 bg-orange-50 rounded-lg">
+                <span class="text-2xl font-bold text-orange-600">${formatNumber(data.total)}</span>
+                <span class="text-gray-600 ml-2">total pageviews in period</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Page</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Referrer</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Browser</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Country</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        ${data.items.map(p => `
+                            <tr class="hover:bg-orange-50 cursor-pointer" onclick="openSessionModal('${p.session_hash}')">
+                                <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(p.time)}</td>
+                                <td class="px-3 py-2 text-sm">
+                                    <div class="text-gray-900 truncate max-w-xs" title="${escapeHtml(p.page_path)}">${escapeHtml(p.page_path)}</div>
+                                    ${p.page_title ? `<div class="text-xs text-gray-500 truncate max-w-xs">${escapeHtml(p.page_title)}</div>` : ''}
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(p.referrer)}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(p.device)}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(p.browser || 'Unknown')}</td>
+                                <td class="px-3 py-2 text-sm text-gray-600">
+                                    ${p.country_code ? getFlagEmoji(p.country_code) + ' ' : ''}${escapeHtml(p.country)}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-gray-400 mt-3">Showing most recent 50 pageviews. Click a row to view full session.</p>
+        `;
+    }
+
+    // Render bounce rate drilldown
+    function renderBounceDrilldown(data) {
+        const stats = data.stats || {};
+
+        return `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-gray-800">${formatNumber(stats.total)}</p>
+                    <p class="text-xs text-gray-500 uppercase">Total Sessions</p>
+                </div>
+                <div class="bg-red-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-red-600">${formatNumber(stats.bounced)}</p>
+                    <p class="text-xs text-gray-500 uppercase">Bounced</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-green-600">${formatNumber(stats.engaged)}</p>
+                    <p class="text-xs text-gray-500 uppercase">Engaged</p>
+                </div>
+                <div class="bg-orange-50 rounded-lg p-4 text-center">
+                    <p class="text-3xl font-bold text-orange-600">${stats.bounce_rate}%</p>
+                    <p class="text-xs text-gray-500 uppercase">Bounce Rate</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- By Landing Page -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Bounce Rate by Landing Page</h4>
+                    <div class="bg-gray-50 rounded-lg overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Page</th>
+                                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Sessions</th>
+                                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Bounce %</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${(data.by_landing_page || []).map(p => `
+                                    <tr class="hover:bg-white">
+                                        <td class="px-3 py-2 text-sm text-gray-900 truncate max-w-xs" title="${escapeHtml(p.landing_page)}">${escapeHtml(p.landing_page)}</td>
+                                        <td class="px-3 py-2 text-sm text-right text-gray-600">${p.sessions}</td>
+                                        <td class="px-3 py-2 text-sm text-right">
+                                            <span class="${parseFloat(p.bounce_rate) > 70 ? 'text-red-600' : parseFloat(p.bounce_rate) < 30 ? 'text-green-600' : 'text-gray-600'}">${p.bounce_rate}%</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- By Source -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Bounce Rate by Source</h4>
+                    <div class="bg-gray-50 rounded-lg overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Sessions</th>
+                                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Bounce %</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${(data.by_source || []).map(s => `
+                                    <tr class="hover:bg-white">
+                                        <td class="px-3 py-2 text-sm">
+                                            <span class="px-2 py-0.5 text-xs rounded ${getTypeColor(s.referrer_type)}">${s.referrer_type}</span>
+                                        </td>
+                                        <td class="px-3 py-2 text-sm text-right text-gray-600">${s.sessions}</td>
+                                        <td class="px-3 py-2 text-sm text-right">
+                                            <span class="${parseFloat(s.bounce_rate) > 70 ? 'text-red-600' : parseFloat(s.bounce_rate) < 30 ? 'text-green-600' : 'text-gray-600'}">${s.bounce_rate}%</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            ${(data.bounced_sessions && data.bounced_sessions.length > 0) ? `
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-700 mb-3">Recent Bounced Sessions</h4>
+                    <div class="overflow-x-auto bg-red-50 rounded-lg">
+                        <table class="w-full">
+                            <thead class="bg-red-100">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Landing Page</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-red-200">
+                                ${data.bounced_sessions.slice(0, 10).map(s => `
+                                    <tr class="hover:bg-red-100 cursor-pointer" onclick="openSessionModal('${s.session_hash}')">
+                                        <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(s.time)}</td>
+                                        <td class="px-3 py-2 text-sm text-gray-900 truncate max-w-xs">${escapeHtml(s.landing_page)}</td>
+                                        <td class="px-3 py-2 text-sm">
+                                            <span class="px-2 py-0.5 text-xs rounded ${getTypeColor(s.referrer_type)}">${s.referrer_type}</span>
+                                        </td>
+                                        <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(s.device)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ` : ''}
+        `;
+    }
+
+    // Render duration drilldown
+    function renderDurationDrilldown(data) {
+        const stats = data.stats || {};
+
+        return `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-orange-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-orange-600">${escapeHtml(stats.avg_formatted || '0s')}</p>
+                    <p class="text-xs text-gray-500 uppercase">Avg Duration</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-green-600">${escapeHtml(stats.max_formatted || '0s')}</p>
+                    <p class="text-xs text-gray-500 uppercase">Longest</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-gray-600">${formatNumber(stats.total_sessions)}</p>
+                    <p class="text-xs text-gray-500 uppercase">Engaged Sessions</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-blue-600">${stats.min_duration || 0}s</p>
+                    <p class="text-xs text-gray-500 uppercase">Shortest</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Duration Buckets -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Session Duration Distribution</h4>
+                    <div class="space-y-2">
+                        ${(data.buckets || []).map(b => {
+                            const maxSessions = Math.max(...(data.buckets || []).map(x => parseInt(x.sessions)));
+                            const percentage = maxSessions > 0 ? (parseInt(b.sessions) / maxSessions * 100) : 0;
+                            return `
+                                <div class="flex items-center gap-3">
+                                    <div class="w-20 text-sm text-gray-600 text-right">${escapeHtml(b.bucket)}</div>
+                                    <div class="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                                        <div class="bg-orange-500 h-full rounded-full flex items-center justify-end pr-2" style="width: ${percentage}%">
+                                            <span class="text-xs text-white font-medium">${b.sessions}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- Longest Sessions -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Longest Sessions</h4>
+                    <div class="bg-gray-50 rounded-lg overflow-hidden max-h-80 overflow-y-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100 sticky top-0">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Landing Page</th>
+                                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Pages</th>
+                                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${(data.longest_sessions || []).map(s => `
+                                    <tr class="hover:bg-white cursor-pointer" onclick="openSessionModal('${s.session_hash}')">
+                                        <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(s.time)}</td>
+                                        <td class="px-3 py-2 text-sm text-gray-900 truncate max-w-xs" title="${escapeHtml(s.landing_page)}">${escapeHtml(s.landing_page)}</td>
+                                        <td class="px-3 py-2 text-sm text-right text-gray-600">${s.pageviews}</td>
+                                        <td class="px-3 py-2 text-sm text-right font-medium text-green-600">${escapeHtml(s.duration)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     // Format time
     function formatTime(datetime) {
