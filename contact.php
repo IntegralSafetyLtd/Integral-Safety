@@ -10,7 +10,7 @@ require_once INCLUDES_PATH . '/sections.php';
 
 $page = getPage('contact');
 $pageTitle = 'Contact Us | ' . getSetting('site_name', SITE_NAME);
-$metaDescription = 'Get in touch with Integral Safety Ltd for a free quote on health and safety services.';
+$metaDescription = 'Contact Integral Safety Ltd in Coalville, Leicestershire. Call 01530 382 150 for a free health and safety quote. Fire risk assessments, IOSH training, audits and consultancy.';
 
 $success = false;
 $error = '';

@@ -8,8 +8,8 @@ require_once INCLUDES_PATH . '/functions.php';
 require_once INCLUDES_PATH . '/sections.php';
 
 $page = getPage('home');
-$pageTitle = $page['title'] . ' | ' . getSetting('site_name', SITE_NAME);
-$metaDescription = $page['meta_description'];
+$pageTitle = 'Health & Safety Consultants Leicestershire | ' . getSetting('site_name', SITE_NAME);
+$metaDescription = $page['meta_description'] ?: 'Professional health and safety consultants in Leicestershire. Fire risk assessments, IOSH training, H&S audits, and consultancy services. Over 20 years experience. Free quotes.';
 
 $services = getServices(true);
 $testimonials = getTestimonials();
@@ -41,7 +41,7 @@ if ($useSections):
 <section class="py-24 bg-cream" id="services">
     <div class="max-w-6xl mx-auto px-6">
         <div class="text-center mb-14">
-            <p class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Our Services</p>
+            <p class="text-sm font-bold text-orange-600 uppercase tracking-widest mb-3">Our Services</p>
             <h2 class="font-heading text-3xl md:text-4xl font-semibold text-navy-900 mb-4">Comprehensive Health & Safety Solutions</h2>
             <p class="text-gray-600 text-lg max-w-2xl mx-auto">
                 Practical, proportionate advice that protects your people and keeps your business compliant.
@@ -61,7 +61,7 @@ if ($useSections):
         </div>
 
         <div class="text-center mt-12">
-            <a href="/services" class="text-orange-500 font-semibold hover:text-orange-600 transition-colors">
+            <a href="/services" class="text-orange-600 font-semibold hover:text-orange-700 transition-colors">
                 View All Services &rarr;
             </a>
         </div>
@@ -76,7 +76,7 @@ if ($useSections):
 <section class="py-24 bg-cream">
     <div class="max-w-6xl mx-auto px-6">
         <div class="text-center mb-14">
-            <p class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Testimonials</p>
+            <p class="text-sm font-bold text-orange-600 uppercase tracking-widest mb-3">Testimonials</p>
             <h2 class="font-heading text-3xl md:text-4xl font-semibold text-navy-900">What Our Clients Say</h2>
         </div>
 
@@ -117,8 +117,8 @@ if ($useSections):
         <div class="grid lg:grid-cols-2 gap-16 items-center relative z-10">
             <div>
                 <!-- Badge -->
-                <div class="inline-flex items-center gap-2 bg-green-100 text-green-500 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     IOSH Approved Training Provider
                 </div>
 
@@ -169,7 +169,7 @@ if ($useSections):
 <section class="py-24 bg-cream" id="services">
     <div class="max-w-6xl mx-auto px-6">
         <div class="text-center mb-14">
-            <p class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Our Services</p>
+            <p class="text-sm font-bold text-orange-600 uppercase tracking-widest mb-3">Our Services</p>
             <h2 class="font-heading text-3xl md:text-4xl font-semibold text-navy-900 mb-4">Comprehensive Health & Safety Solutions</h2>
             <p class="text-gray-600 text-lg max-w-2xl mx-auto">
                 Practical, proportionate advice that protects your people and keeps your business compliant.
@@ -189,7 +189,7 @@ if ($useSections):
         </div>
 
         <div class="text-center mt-12">
-            <a href="/services" class="text-orange-500 font-semibold hover:text-orange-600 transition-colors">
+            <a href="/services" class="text-orange-600 font-semibold hover:text-orange-700 transition-colors">
                 View All Services &rarr;
             </a>
         </div>
@@ -201,7 +201,7 @@ if ($useSections):
     <div class="max-w-6xl mx-auto px-6">
         <div class="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-                <p class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Why Choose Us</p>
+                <p class="text-sm font-bold text-orange-600 uppercase tracking-widest mb-3">Why Choose Us</p>
                 <h2 class="font-heading text-3xl md:text-4xl font-semibold text-navy-900 mb-6">20+ Years Protecting Midlands Businesses</h2>
                 <p class="text-gray-600 text-lg mb-8">
                     We're not just consultants – we're your partners in creating safer workplaces. Our practical, no-nonsense approach means you get real solutions, not just paperwork.
@@ -213,7 +213,7 @@ if ($useSections):
                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-navy-900">IOSH Approved Training Provider</h4>
+                            <p class="font-semibold text-navy-900">IOSH Approved Training Provider</p>
                             <p class="text-gray-600">Nationally recognised qualifications</p>
                         </div>
                     </div>
@@ -222,7 +222,7 @@ if ($useSections):
                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-navy-900">Local Knowledge</h4>
+                            <p class="font-semibold text-navy-900">Local Knowledge</p>
                             <p class="text-gray-600">Based in Coalville & Melton Mowbray</p>
                         </div>
                     </div>
@@ -231,7 +231,7 @@ if ($useSections):
                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-navy-900">Practical Approach</h4>
+                            <p class="font-semibold text-navy-900">Practical Approach</p>
                             <p class="text-gray-600">Solutions that work for your business</p>
                         </div>
                     </div>
@@ -240,7 +240,10 @@ if ($useSections):
 
             <div class="relative">
                 <div class="w-full h-[400px] rounded-2xl shadow-xl overflow-hidden">
-                    <img src="/uploads/consultation.jpg" alt="Health and safety consultation meeting" class="w-full h-full object-cover">
+                    <picture>
+                        <source srcset="/uploads/consultation.webp" type="image/webp">
+                        <img src="/uploads/consultation.jpg" alt="Health and safety consultation meeting" class="w-full h-full object-cover" loading="lazy">
+                    </picture>
                 </div>
             </div>
         </div>
@@ -252,7 +255,7 @@ if ($useSections):
 <section class="py-24 bg-cream">
     <div class="max-w-6xl mx-auto px-6">
         <div class="text-center mb-14">
-            <p class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-3">Testimonials</p>
+            <p class="text-sm font-bold text-orange-600 uppercase tracking-widest mb-3">Testimonials</p>
             <h2 class="font-heading text-3xl md:text-4xl font-semibold text-navy-900">What Our Clients Say</h2>
         </div>
 
